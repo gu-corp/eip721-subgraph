@@ -1,25 +1,18 @@
-# Install
+# EIP-721 Subgraph
 
-`npm i -D eip721-subgraph`
-
-# use
-
-install `subgraph-deploy`
-
-`npm i -D subgraph-deploy`
-
-
-in your package.json you can add a script to deploy that subgraph in your running graph-node
-
-```json
-{
-  "scripts": {
-    "deploy:eip721-subgraph": "subgraph-deploy -s wighawag/eip721-subgraph -f eip721-subgraph -i http://localhost:5001/api -g http://localhost:8020"
-  }
-}
+## Deployment
 ```
+NETWORK_NAME=xxx START_BLOCK=xxx SUBGRAPH_NAME=xxx GRAPH_NODE_URL=xxx IPFS_URL=xxx VERSION=xxx sh deploy.sh
+```
+Notes:
+- NETWORK_NAME: Deployed network name in Graphnode
+- START_BLOCK: Start block
+- SUBGRAPH_NAME: Subgraph name
+- GRAPH_NODE_URL: Graphnode admin url
+- IPFS_URL: IPFS url
+- VERSION: Subgraph version. Ex: v0.0.9
 
-# example graphQL query
+## Example graphQL query
 ```
 {
   tokens {
