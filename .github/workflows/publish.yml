@@ -1,0 +1,55 @@
+name: Publish new version
+run-name: Publish new ${{ inputs.bump }} version from ${{ github.ref_name }} by @${{ github.actor }}
+on:
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: 'Positionals'
+        required: true
+        type: choice
+        default: 'prerelease'
+        options:
+          - major
+          - minor
+          - patch
+          - premajor
+          - preminor
+          - prepatch
+          - prerelease
+      preid:
+        description: 'Prerelease identifier'
+        required: true
+        type: choice
+        default: 'alpha'
+        options:
+          - alpha
+          - beta
+          - rc
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}-${{ github.actor }}
+  cancel-in-progress: true
+
+env:
+  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [16.x]
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+      - run: npm install
+      - name: Version
+        run: |
+          git config user.name ${{ github.actor }}
+          git config user.email ${{ github.actor }}@users.noreply.github.com
+          TAG=$(npm version ${{ inputs.bump }} --preid ${{ inputs.preid }})
+          git push origin
+          git push origin $TAG

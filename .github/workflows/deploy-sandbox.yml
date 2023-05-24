@@ -1,0 +1,34 @@
+name: Deploy dev environment
+run-name: Deploy ${{ github.ref_name }} to dev environment by @${{ github.actor }}
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}-${{ github.actor }}
+  cancel-in-progress: true
+
+jobs:
+  subgraph:
+    if: ${{ inputs.deploy_subgraph == true }}
+    name: Subgraph - Deploy
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./packages/gu-coin-studio-subgraph
+    strategy:
+      matrix:
+        node-version: [16.x]
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: "npm"
+      - run: sh deploy.sh
+        env:
+          NETWORK_NAME: "gu_sandbox"
+          START_BLOCK: "0"
+          SUBGRAPH_NAME: "gulabs/eip721"
+          GRAPH_NODE_URL: "https://admin.graphnode.sandbox1.japanopenchain.org"
+          IPFS_URL: "https://ipfs.graphnode.sandbox1.japanopenchain.org"
+          VERSION: "${{ github.ref_name }}"
