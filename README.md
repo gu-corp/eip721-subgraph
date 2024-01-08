@@ -12,6 +12,11 @@ Notes:
 - IPFS_URL: IPFS url
 - VERSION: Subgraph version. Ex: v0.0.9
 
+Example:
+```
+NETWORK_NAME=gusandbox START_BLOCK=1 SUBGRAPH_NAME=gu-corp/eip721 GRAPH_NODE_URL=http://localhost:8020/ IPFS_URL=http://localhost:5001/ VERSION=v1.0.0 sh deploy.sh
+```
+
 ## Example graphQL query
 ```
 {
