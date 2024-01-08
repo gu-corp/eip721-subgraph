@@ -23,8 +23,8 @@
     "remove": "graph remove",
     "create": "graph create",
     "deploy": "graph deploy",
-    "create-local": "graph create gulabs/eip-721 --node http://localhost:8020/",
-    "remove-local": "graph remove gulabs/eip-721 --node http://localhost:8020/",
-    "deploy-local": "graph deploy gulabs/eip-721 --node http://localhost:8020/ --ipfs http://localhost:5001"
+    "create-local": "graph create gu-corp/eip-721 --node http://localhost:8020/",
+    "remove-local": "graph remove gu-corp/eip-721 --node http://localhost:8020/",
+    "deploy-local": "graph deploy gu-corp/eip-721 --node http://localhost:8020/ --ipfs http://localhost:5001"
   }
 }
