@@ -1,6 +1,6 @@
 {
   "name": "eip721-subgraph",
-  "version": "1.0.0",
+  "version": "1.0.0-build.0",
   "license": "AGPL-3.0-only",
   "files": [
     "src/",
