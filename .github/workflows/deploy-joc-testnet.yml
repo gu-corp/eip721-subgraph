@@ -1,5 +1,5 @@
-name: Deploy to gusandbox graphnode
-run-name: Deploy ${{ github.ref_name }} to gusandbox graphnode by @${{ github.actor }}
+name: Deploy to joc testnet graphnode
+run-name: Deploy ${{ github.ref_name }} to joc testnet graphnode by @${{ github.actor }}
 on:
   workflow_dispatch:
 
@@ -23,9 +23,9 @@ jobs:
           cache: "yarn"
       - run: sh deploy.sh
         env:
-          NETWORK_NAME: "gusandbox"
+          NETWORK_NAME: "joc-testnet"
           START_BLOCK: "0"
           SUBGRAPH_NAME: "gu-corp/eip721"
-          GRAPH_NODE_URL: "http://34.146.242.140:8020" # "https://admin.graphnode.sandbox1.japanopenchain.org"
-          IPFS_URL: "http://34.146.242.140:5001" # "https://ipfs.graphnode.sandbox1.japanopenchain.org"
+          GRAPH_NODE_URL: "http://34.146.178.40:8020" # "https://admin.testnet.sandbox1.japanopenchain.org"
+          IPFS_URL: "http://34.146.178.40:5001" # "https://ipfs.testnet.sandbox1.japanopenchain.org"
           VERSION: "${{ github.ref_name }}"
