@@ -12,8 +12,8 @@
     "schema.graphql"
   ],
   "devDependencies": {
-    "@graphprotocol/graph-cli": "0.20.3",
-    "@graphprotocol/graph-ts": "^0.18.1"
+    "@graphprotocol/graph-cli": "^0.67.2",
+    "@graphprotocol/graph-ts": "^0.32.0"
   },
   "scripts": {
     "graph": "graph",
