@@ -31,24 +31,6 @@ function supportsInterface(
   return !supports.reverted && supports.value == expected;
 }
 
-function setCharAt(str: string, index: i32, char: string): string {
-  if (index > str.length - 1) return str;
-  return str.substr(0, index) + char + str.substr(index + 1);
-}
-
-function normalize(strValue: string): string {
-  if (strValue.length === 1 && strValue.charCodeAt(0) === 0) {
-    return '';
-  } else {
-    for (let i = 0; i < strValue.length; i++) {
-      if (strValue.charCodeAt(i) === 0) {
-        strValue = setCharAt(strValue, i, '\ufffd'); // graph-node db does not support string with '\u0000'
-      }
-    }
-    return strValue;
-  }
-}
-
 export function handleTransfer(event: Transfer): void {
   let tokenId = event.params.id;
   let id = event.address.toHex() + '_' + tokenId.toString();
@@ -93,11 +75,11 @@ export function handleTransfer(event: Transfer): void {
       tokenContract.numOwners = ZERO;
       let name = contract.try_name();
       if (!name.reverted) {
-        tokenContract.name = normalize(name.value);
+        tokenContract.name = name.value;
       }
       let symbol = contract.try_symbol();
       if (!symbol.reverted) {
-        tokenContract.symbol = normalize(symbol.value);
+        tokenContract.symbol = symbol.value;
       }
     } else {
       return;
@@ -159,7 +141,7 @@ export function handleTransfer(event: Transfer): void {
         if (tokenContract.supportsEIP721Metadata) {
           let metadataURI = contract.try_tokenURI(tokenId);
           if (!metadataURI.reverted) {
-            eip721Token.tokenURI = normalize(metadataURI.value);
+            eip721Token.tokenURI = metadataURI.value;
           } else {
             eip721Token.tokenURI = '';
           }
