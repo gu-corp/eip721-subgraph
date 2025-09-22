@@ -19,12 +19,14 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
-          cache: "yarn"
+          cache: "npm"
+      - run: npm install
+      - run: graph auth ${{ secrets.GRAPH_AUTH_KEY }}
       - run: sh deploy.sh
         env:
           NETWORK_NAME: "joc-testnet"
           START_BLOCK: "0"
           SUBGRAPH_NAME: "gu-corp/eip721"
-          GRAPH_NODE_URL: "http://34.146.178.40:8020" # "https://admin.testnet.sandbox1.japanopenchain.org"
-          IPFS_URL: "http://34.146.178.40:5001" # "https://ipfs.testnet.sandbox1.japanopenchain.org"
+          GRAPH_NODE_URL: "https://api.studio.thegraph.com/deploy/"
+          IPFS_URL: "https://api.thegraph.com/ipfs/"
           VERSION: "${{ github.ref_name }}"
