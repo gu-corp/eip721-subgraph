@@ -11,6 +11,10 @@
     "subgraph.yanl",
     "schema.graphql"
   ],
+  "dependencies": {
+    "@amxx/graphprotocol-utils": "^1.1.0",
+    "@openzeppelin/contracts": "^5.0.2"
+  },
   "devDependencies": {
     "@graphprotocol/graph-cli": "^0.67.2",
     "@graphprotocol/graph-ts": "^0.32.0"

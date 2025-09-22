@@ -1,197 +1,266 @@
-import { store, Bytes, BigInt } from '@graphprotocol/graph-ts';
-import { Transfer, EIP721 } from '../generated/EIP721/EIP721';
 import {
-  Token,
-  TokenContract,
-  Owner,
-  All,
-  OwnerPerTokenContract,
-} from '../generated/schema';
+	Address,
+	BigInt,
+	Bytes,
+  ethereum
+} from '@graphprotocol/graph-ts'
 
-let ZERO_ADDRESS_STRING = '0x0000000000000000000000000000000000000000';
+import {
+	Account,
+	ERC721Contract,
+	ERC721Token,
+	ERC721Operator,
+  ERC721Transfer
+} from '../generated/schema'
 
-let ZERO_ADDRESS: Bytes = Bytes.fromHexString(ZERO_ADDRESS_STRING) as Bytes;
-let ZERO = BigInt.fromI32(0);
-let ONE = BigInt.fromI32(1);
+import {
+	IERC721,
+	Approval       as ApprovalEvent,
+	ApprovalForAll as ApprovalForAllEvent,
+	Transfer       as TransferEvent,
+} from '../generated/erc721/IERC721'
 
-function toBytes(hexString: String): Bytes {
-  let result = new Uint8Array(hexString.length / 2);
-  for (let i = 0; i < hexString.length; i += 2) {
-    result[i / 2] = parseInt(hexString.substr(i, 2), 16) as u32;
-  }
-  return changetype<Bytes>(result);
+import {
+	ConsecutiveTransfer as ConsecutiveTransfer,
+} from '../generated/erc721-concecutive/IERC2309'
+
+import {
+	MetadataUpdate      as MetadataUpdateEvent,
+	BatchMetadataUpdate as BatchMetadataUpdateEvent,
+} from '../generated/erc721-metadataupdate/IERC4906'
+
+import {
+	events,
+	transactions,
+} from '@amxx/graphprotocol-utils'
+
+export function fetchAccount(address: Address): Account {
+	let account = new Account(address)
+	account.save()
+	return account
 }
 
-function supportsInterface(
-  contract: EIP721,
-  interfaceId: String,
-  expected: boolean = true,
-): boolean {
-  let supports = contract.try_supportsInterface(toBytes(interfaceId));
-  return !supports.reverted && supports.value == expected;
+export function supportsInterface(contract: ethereum.SmartContract, interfaceId: String, expected: boolean = true): boolean {
+	let result = ethereum.call(new ethereum.SmartContractCall(
+		contract._name,      // '',
+		contract._address,   // address,
+		'supportsInterface', // '',
+		'supportsInterface(bytes4):(bool)',
+		[ethereum.Value.fromFixedBytes(Bytes.fromHexString(interfaceId) as Bytes)]
+	))
+
+	return result != null && (result as Array<ethereum.Value>)[0].toBoolean() == expected
 }
 
-export function handleTransfer(event: Transfer): void {
-  let tokenId = event.params.id;
-  let id = event.address.toHex() + '_' + tokenId.toString();
-  let contractId = event.address.toHex();
-  let from = event.params.from.toHex();
-  let to = event.params.to.toHex();
 
-  let all = All.load('all');
-  if (all == null) {
-    all = new All('all');
-    all.numOwners = ZERO;
-    all.numTokens = ZERO;
-    all.numTokenContracts = ZERO;
-  }
+export function fetchERC721(address: Address): ERC721Contract | null {
+	let erc721   = IERC721.bind(address)
 
-  let contract = EIP721.bind(event.address);
-  let tokenContract = TokenContract.load(contractId);
-  if (tokenContract == null) {
-    // log.error('contract : {}',[event.address.toHexString()]);
-    let supportsEIP165Identifier = supportsInterface(contract, '01ffc9a7');
-    let supportsEIP721Identifier = supportsInterface(contract, '80ac58cd');
-    let supportsNullIdentifierFalse = supportsInterface(
-      contract,
-      '00000000',
-      false,
-    );
-    let supportsEIP721 =
-      supportsEIP165Identifier &&
-      supportsEIP721Identifier &&
-      supportsNullIdentifierFalse;
+	// Try load entry
+	let contract = ERC721Contract.load(address)
+	if (contract != null) {
+		return contract
+	}
 
-    let supportsEIP721Metadata = false;
-    if (supportsEIP721) {
-      supportsEIP721Metadata = supportsInterface(contract, '5b5e139f');
-      // log.error('NEW CONTRACT eip721Metadata for {} : {}', [event.address.toHex(), supportsEIP721Metadata ? 'true' : 'false']);
-    }
-    if (supportsEIP721) {
-      tokenContract = new TokenContract(contractId);
-      tokenContract.doAllAddressesOwnTheirIdByDefault = false;
-      tokenContract.supportsEIP721Metadata = supportsEIP721Metadata;
-      tokenContract.numTokens = ZERO;
-      tokenContract.numOwners = ZERO;
-      let name = contract.try_name();
-      if (!name.reverted) {
-        tokenContract.name = name.value;
-      }
-      let symbol = contract.try_symbol();
-      if (!symbol.reverted) {
-        tokenContract.symbol = symbol.value;
-      }
-    } else {
-      return;
-    }
-    all.numTokenContracts = all.numTokenContracts.plus(ONE);
+	// Detect using ERC165
+	let detectionId      = address.concat(Bytes.fromHexString('80ac58cd')) // Address + ERC721
+	let detectionAccount = Account.load(detectionId)
 
-    let doAllAddressesOwnTheirIdByDefault =
-      contract.try_doAllAddressesOwnTheirIdByDefault();
-    if (!doAllAddressesOwnTheirIdByDefault.reverted) {
-      tokenContract.doAllAddressesOwnTheirIdByDefault =
-        doAllAddressesOwnTheirIdByDefault.value; // only set it at creation
-    } else {
-      tokenContract.doAllAddressesOwnTheirIdByDefault = false;
-    }
-  }
+	// On missing cache
+	if (detectionAccount == null) {
+		detectionAccount = new Account(detectionId)
+		let introspection_01ffc9a7 = supportsInterface(erc721, '01ffc9a7') // ERC165
+		let introspection_80ac58cd = supportsInterface(erc721, '80ac58cd') // ERC721
+		let introspection_00000000 = supportsInterface(erc721, '00000000', false)
+		let isERC721               = introspection_01ffc9a7 && introspection_80ac58cd && introspection_00000000
+		detectionAccount.asERC721  = isERC721 ? address : null
+		detectionAccount.save()
+	}
 
-  if (from != ZERO_ADDRESS_STRING || to != ZERO_ADDRESS_STRING) {
-    // skip if from zero to zero
+	// If an ERC721, build entry
+	if (detectionAccount.asERC721) {
+		contract                  = new ERC721Contract(address)
+		let try_name              = erc721.try_name()
+		let try_symbol            = erc721.try_symbol()
+		contract.name             = try_name.reverted   ? '' : try_name.value
+		contract.symbol           = try_symbol.reverted ? '' : try_symbol.value
+		contract.supportsMetadata = supportsInterface(erc721, '5b5e139f') // ERC721Metadata
+		contract.asAccount        = address
+		contract.save()
 
-    if (from != ZERO_ADDRESS_STRING) {
-      // existing token
-      let currentOwnerPerTokenContractId = contractId + '_' + from;
-      let currentOwnerPerTokenContract = OwnerPerTokenContract.load(
-        currentOwnerPerTokenContractId,
-      );
-      if (currentOwnerPerTokenContract != null) {
-        if (currentOwnerPerTokenContract.numTokens.equals(ONE)) {
-          tokenContract.numOwners = tokenContract.numOwners.minus(ONE);
-        }
-        currentOwnerPerTokenContract.numTokens =
-          currentOwnerPerTokenContract.numTokens.minus(ONE);
-        currentOwnerPerTokenContract.save();
-      }
+		let account               = fetchAccount(address)
+		account.asERC721          = address
+		account.save()
+	}
 
-      let currentOwner = Owner.load(from);
-      if (currentOwner != null) {
-        if (currentOwner.numTokens.equals(ONE)) {
-          all.numOwners = all.numOwners.minus(ONE);
-        }
-        currentOwner.numTokens = currentOwner.numTokens.minus(ONE);
-        currentOwner.save();
-      }
-    } // else minting
+	return contract
+}
 
-    if (to != ZERO_ADDRESS_STRING) {
-      // transfer
-      let newOwner = Owner.load(to);
-      if (newOwner == null) {
-        newOwner = new Owner(to);
-        newOwner.numTokens = ZERO;
-      }
+export function fetchERC721Token(contract: ERC721Contract, identifier: BigInt): ERC721Token {
+	let id = contract.id.toHex().concat('/').concat(identifier.toHex())
+	let token = ERC721Token.load(id)
 
-      let eip721Token = Token.load(id);
-      if (eip721Token == null) {
-        eip721Token = new Token(id);
-        eip721Token.contract = tokenContract.id;
-        eip721Token.tokenID = tokenId;
-        eip721Token.mintTime = event.block.timestamp;
-        if (tokenContract.supportsEIP721Metadata) {
-          let metadataURI = contract.try_tokenURI(tokenId);
-          if (!metadataURI.reverted) {
-            eip721Token.tokenURI = metadataURI.value;
-          } else {
-            eip721Token.tokenURI = '';
-          }
-        } else {
-          // log.error('tokenURI not supported {}', [tokenContract.id]);
-          eip721Token.tokenURI = ''; // TODO null ?
-        }
-      }
+	if (token == null) {
+		fetchAccount(Address.zero())
+		token             = new ERC721Token(id)
+		token.contract    = contract.id
+		token.identifier  = identifier
+		token.owner       = Address.zero()
+		token.approval    = Address.zero()
 
-      if (from == ZERO_ADDRESS_STRING) {
-        // mint +1
-        all.numTokens = all.numTokens.plus(ONE);
-        tokenContract.numTokens = tokenContract.numTokens.plus(ONE);
-      }
+		if (contract.supportsMetadata) {
+			let erc721       = IERC721.bind(Address.fromBytes(contract.id))
+			let try_tokenURI = erc721.try_tokenURI(identifier)
+			token.uri        = try_tokenURI.reverted ? '' : try_tokenURI.value
+		}
+	}
 
-      eip721Token.owner = newOwner.id;
-      eip721Token.save();
+	return token as ERC721Token
+}
 
-      if (newOwner.numTokens.equals(ZERO)) {
-        all.numOwners = all.numOwners.plus(ONE);
-      }
-      newOwner.numTokens = newOwner.numTokens.plus(ONE);
-      newOwner.save();
+export function fetchERC721Operator(contract: ERC721Contract, owner: Account, operator: Account): ERC721Operator {
+	let id = contract.id.toHex().concat('/').concat(owner.id.toHex()).concat('/').concat(operator.id.toHex())
+	let op = ERC721Operator.load(id)
 
-      let newOwnerPerTokenContractId = contractId + '_' + to;
-      let newOwnerPerTokenContract = OwnerPerTokenContract.load(
-        newOwnerPerTokenContractId,
-      );
-      if (newOwnerPerTokenContract == null) {
-        newOwnerPerTokenContract = new OwnerPerTokenContract(
-          newOwnerPerTokenContractId,
-        );
-        newOwnerPerTokenContract.owner = newOwner.id;
-        newOwnerPerTokenContract.contract = tokenContract.id;
-        newOwnerPerTokenContract.numTokens = ZERO;
-      }
+	if (op == null) {
+		op          = new ERC721Operator(id)
+		op.contract = contract.id
+		op.owner    = owner.id
+		op.operator = operator.id
+	}
 
-      if (newOwnerPerTokenContract.numTokens.equals(ZERO)) {
-        tokenContract.numOwners = tokenContract.numOwners.plus(ONE);
-      }
-      newOwnerPerTokenContract.numTokens =
-        newOwnerPerTokenContract.numTokens.plus(ONE);
-      newOwnerPerTokenContract.save();
-    } else {
-      // burn
-      store.remove('Token', id);
-      all.numTokens = all.numTokens.minus(ONE);
-      tokenContract.numTokens = tokenContract.numTokens.minus(ONE);
-    }
-  }
-  tokenContract.save();
-  all.save();
+	return op as ERC721Operator
+}
+
+export function handleTransfer(event: TransferEvent): void {
+	let contract = fetchERC721(event.address)
+	if (contract == null) return
+
+	let token = fetchERC721Token(contract, event.params.tokenId)
+	let from  = fetchAccount(event.params.from)
+	let to    = fetchAccount(event.params.to)
+
+	token.owner    = to.id
+	token.approval = fetchAccount(Address.zero()).id // implicit approval reset on transfer
+	token.save()
+
+	let ev         = new ERC721Transfer(events.id(event))
+	ev.emitter     = contract.id
+	ev.transaction = transactions.log(event).id
+	ev.timestamp   = event.block.timestamp
+	ev.contract    = contract.id
+	ev.token       = token.id
+	ev.from        = from.id
+	ev.to          = to.id
+	ev.save()
+}
+
+export function handleConsecutiveTransfer(event: ConsecutiveTransfer): void {
+	// Updates of blocks larger than 5000 tokens may DoS the subgraph, we skip them
+	if (event.params.toTokenId.minus(event.params.fromTokenId) > BigInt.fromI32(5000)) return
+
+	let contract = fetchERC721(event.address)
+	if (contract == null) return
+
+	let from  = fetchAccount(event.params.fromAddress)
+	let to    = fetchAccount(event.params.toAddress)
+	let count = event.params.toTokenId.minus(event.params.fromTokenId).toI32() // This is <=5000 so won't revert
+
+	for (let index = 0; index <= count; ++index) {
+		let tokenId    = event.params.fromTokenId.plus(BigInt.fromI32(index))
+		let token      = fetchERC721Token(contract, tokenId)
+		token.owner    = to.id
+		token.approval = fetchAccount(Address.zero()).id // implicit approval reset on transfer
+		token.save()
+
+		let ev         = new ERC721Transfer(events.id(event).concat('-').concat(tokenId.toString()))
+		ev.emitter     = contract.id
+		ev.transaction = transactions.log(event).id
+		ev.timestamp   = event.block.timestamp
+		ev.contract    = contract.id
+		ev.token       = token.id
+		ev.from        = from.id
+		ev.to          = to.id
+		ev.save()
+	}
+}
+
+export function handleApproval(event: ApprovalEvent): void {
+	let contract = fetchERC721(event.address)
+	if (contract == null) return
+
+	let token    = fetchERC721Token(contract, event.params.tokenId)
+	let owner    = fetchAccount(event.params.owner)
+	let approved = fetchAccount(event.params.approved)
+
+	token.owner    = owner.id // this should not be necessary, owner changed is signaled by a transfer event
+	token.approval = approved.id
+
+	token.save()
+	owner.save()
+	approved.save()
+
+	// let ev = new Approval(events.id(event))
+	// ev.emitter     = contract.id
+	// ev.transaction = transactions.log(event).id
+	// ev.timestamp   = event.block.timestamp
+	// ev.token       = token.id
+	// ev.owner       = owner.id
+	// ev.approved    = approved.id
+	// ev.save()
+}
+
+export function handleApprovalForAll(event: ApprovalForAllEvent): void {
+	let contract = fetchERC721(event.address)
+	if (contract == null) return
+
+	let owner      = fetchAccount(event.params.owner)
+	let operator   = fetchAccount(event.params.operator)
+	let delegation = fetchERC721Operator(contract, owner, operator)
+
+	delegation.approved = event.params.approved
+
+	delegation.save()
+
+	// 	let ev = new ApprovalForAll(events.id(event))
+	// 	ev.emitter     = contract.id
+	// 	ev.transaction = transactions.log(event).id
+	// 	ev.timestamp   = event.block.timestamp
+	// 	ev.delegation  = delegation.id
+	// 	ev.owner       = owner.id
+	// 	ev.operator    = operator.id
+	// 	ev.approved    = event.params.approved
+	// 	ev.save()
+}
+
+export function handleMetadataUpdate(event: MetadataUpdateEvent) : void {
+	let contract = fetchERC721(event.address)
+	if (contract == null || !contract.supportsMetadata) return
+
+	_updateURI(contract, event.params._tokenId)
+}
+
+export function handleBatchMetadataUpdate(event: BatchMetadataUpdateEvent) : void {
+	// Updates of blocks larger than 5000 tokens may DoS the subgraph, we skip them
+	if (event.params._toTokenId.minus(event.params._fromTokenId) > BigInt.fromI32(5000)) return
+
+	let contract = fetchERC721(event.address)
+	if (contract == null || !contract.supportsMetadata) return
+
+	let count = event.params._toTokenId.minus(event.params._fromTokenId).toI32(); // This is <=5000 so won't revert
+
+	for (let index = 0; index <= count; ++index) {
+		_updateURI(contract, event.params._fromTokenId.plus(BigInt.fromI32(index)))
+	}
+}
+
+function _updateURI(contract: ERC721Contract, tokenId: BigInt) : void {
+	// If token was never minted (transfered) then the owner was set to 0 by default in `fetchERC721Token`
+	// In that case we don't want to save to token to the database.
+	let token        = fetchERC721Token(contract, tokenId)
+	if (token.owner == Address.zero()) return
+
+	let try_tokenURI = IERC721.bind(Address.fromBytes(contract.id)).try_tokenURI(tokenId)
+	token.uri        = try_tokenURI.reverted ? '' : try_tokenURI.value
+	token.save()
 }

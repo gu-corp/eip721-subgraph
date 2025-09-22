@@ -1,3 +1,5 @@
+export $(grep -v '^#' .env | xargs)
+
 if [ -z "${NETWORK_NAME}" ]
 then
   echo NETWORK_NAME env is missing
@@ -42,3 +44,7 @@ npm run build
 npm run graph -- remove $SUBGRAPH_NAME --node $GRAPH_NODE_URL
 npm run graph -- create $SUBGRAPH_NAME --node $GRAPH_NODE_URL
 npm run graph -- deploy $SUBGRAPH_NAME --node $GRAPH_NODE_URL --ipfs $IPFS_URL --version-label $VERSION
+
+
+
+
