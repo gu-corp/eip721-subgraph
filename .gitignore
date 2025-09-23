@@ -1,9 +1,3 @@
-node_modules/
-.env
-generated/
-artifacts/
-cache/
-deployments/localhost_*
-contracts.json
-subgraph.yaml
-build/
+build
+generated
+node_modules

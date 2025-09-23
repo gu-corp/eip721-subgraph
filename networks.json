@@ -1,0 +1,22 @@
+{
+  "mainnet": {
+    "EIP721": {
+      "startBlock": 1
+    }
+  },
+  "sepolia": {
+    "EIP721": {
+      "startBlock": 0
+    }
+  },
+  "joc": {
+    "EIP721": {
+      "startBlock": 0
+    }
+  },
+  "joc-testnet": {
+    "EIP721": {
+      "startBlock": 0
+    }
+  }
+}

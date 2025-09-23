@@ -6,10 +6,10 @@ schema:
 dataSources:
   - kind: ethereum/contract
     name: EIP721
-    network: NETWORK_NAME
+    network: joc
     source:
       abi: EIP721
-      startBlock: START_BLOCK
+      startBlock: 0
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7

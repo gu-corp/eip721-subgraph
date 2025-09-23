@@ -1,30 +1,19 @@
 {
-  "name": "eip721-subgraph",
+  "name": "@gu-corp/eip721-subgraph",
   "version": "1.0.0-build.2",
-  "license": "AGPL-3.0-only",
-  "files": [
-    "src/",
-    "files/",
-    "LICENSE",
-    "README.md",
-    "build",
-    "subgraph.yanl",
-    "schema.graphql"
-  ],
-  "devDependencies": {
-    "@graphprotocol/graph-cli": "^0.67.2",
-    "@graphprotocol/graph-ts": "^0.32.0"
-  },
+  "description": "EIP-721 Subgraph",
   "scripts": {
-    "graph": "graph",
     "clean": "rimraf build generated",
-    "codegen": "graph codegen",
-    "build": "npm run clean && npm run codegen && graph build",
+    "auth": "graph auth",
     "remove": "graph remove",
     "create": "graph create",
+    "codegen": "graph codegen",
+    "build": "graph build",
     "deploy": "graph deploy",
-    "create-local": "graph create gu-corp/eip-721 --node http://localhost:8020/",
-    "remove-local": "graph remove gu-corp/eip-721 --node http://localhost:8020/",
-    "deploy-local": "graph deploy gu-corp/eip-721 --node http://localhost:8020/ --ipfs http://localhost:5001"
+    "graph": "graph"
+  },
+  "devDependencies": {
+    "@graphprotocol/graph-cli": "^0.96.0",
+    "@graphprotocol/graph-ts": "^0.38.1"
   }
 }
