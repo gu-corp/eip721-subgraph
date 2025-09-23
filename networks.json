@@ -1,7 +1,7 @@
 {
   "mainnet": {
     "EIP721": {
-      "startBlock": 1
+      "startBlock": 0
     }
   },
   "sepolia": {
