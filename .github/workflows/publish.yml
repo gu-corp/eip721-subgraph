@@ -4,10 +4,10 @@ on:
   workflow_dispatch:
     inputs:
       bump:
-        description: 'Positionals'
+        description: "Positionals"
         required: true
         type: choice
-        default: 'build'
+        default: "build"
         options:
           - major
           - minor
@@ -25,16 +25,13 @@ env:
 jobs:
   publish-version:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node-version: [18.x]
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
         with:
-          node-version: ${{ matrix.node-version }}
-          cache: 'yarn'
-      - run: yarn
+          node-version: 22
+          cache: "npm"
+      - run: npm install
       - name: Version
         id: create-version
         run: |
