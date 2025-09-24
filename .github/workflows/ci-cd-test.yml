@@ -1,0 +1,26 @@
+name: Ci-cd test
+run-name: Ci-cd test
+on:
+  push:
+    branches:
+      - "ci-test*"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}-${{ github.actor }}
+  cancel-in-progress: true
+
+jobs:
+  subgraph:
+    name: Subgraph - Deploy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 22
+          cache: "npm"
+      - run: npm install
+      - run: npm run clean
+      - run: npm run codegen
+      - run: npm run build -- --network mainnet
+      - run: npm run graph auth ${{ secrets.THE_GRAPH_EIP_721_JOC_DEPLOY_KEY }}
