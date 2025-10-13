@@ -1,5 +1,5 @@
-name: Deploy eip721 ethereum
-run-name: Deploy eip721 subgraph ${{ github.ref_name }} for ethereum by @${{ github.actor }}
+name: Deploy eip721 mainnet
+run-name: Deploy eip721 subgraph ${{ github.ref_name }} for mainnet by @${{ github.actor }}
 on:
   workflow_dispatch:
 
@@ -21,5 +21,5 @@ jobs:
       - run: npm run clean
       - run: npm run codegen
       - run: npm run build -- --network mainnet
-      - run: npm run graph auth ${{ secrets.THE_GRAPH_EIP_721_ETHEREUM_DEPLOY_KEY }}
-      - run: npm run deploy eip-721-ethereum -- --node https://api.studio.thegraph.com/deploy/ --ipfs https://api.thegraph.com/ipfs/ --version-label ${{ github.ref_name }}
+      - run: npm run graph auth ${{ secrets.THE_GRAPH_EIP_721_MAINNET_DEPLOY_KEY }}
+      - run: npm run deploy eip-721-mainnet -- --node https://api.studio.thegraph.com/deploy/ --ipfs https://api.thegraph.com/ipfs/ --version-label ${{ github.ref_name }}
