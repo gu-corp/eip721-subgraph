@@ -138,25 +138,6 @@ export function handleTransfer(event: Transfer): void {
         eip721Token.contract = tokenContract.id;
         eip721Token.tokenID = tokenId;
         eip721Token.mintTime = event.block.timestamp;
-        if (tokenContract.supportsEIP721Metadata) {
-          let metadataURI = contract.try_tokenURI(tokenId);
-          if (!metadataURI.reverted) {
-            // Limit tokenURI length to prevent RPC errors with large responses
-            // Some tokens return data exceeding RPC provider limits (>1MB)
-            let uri = metadataURI.value;
-            if (uri.length > 10000) {
-              // Truncate excessively long URIs and add indicator
-              eip721Token.tokenURI = uri.substring(0, 10000) + '...[truncated]';
-            } else {
-              eip721Token.tokenURI = uri;
-            }
-          } else {
-            eip721Token.tokenURI = '';
-          }
-        } else {
-          // log.error('tokenURI not supported {}', [tokenContract.id]);
-          eip721Token.tokenURI = ''; // TODO null ?
-        }
       }
 
       if (from == ZERO_ADDRESS_STRING) {

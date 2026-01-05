@@ -24,7 +24,6 @@ NETWORK_NAME=gusandbox START_BLOCK=1 SUBGRAPH_NAME=gu-corp/eip721 GRAPH_NODE_URL
     contract
     tokenID
     owner
-    tokenURI
   }
 }
 ```
@@ -38,7 +37,6 @@ or
     contract
     tokenID
     owner
-    tokenURI
     mintTime
   }
   
