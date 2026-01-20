@@ -141,15 +141,7 @@ export function handleTransfer(event: Transfer): void {
         if (tokenContract.supportsEIP721Metadata) {
           let metadataURI = contract.try_tokenURI(tokenId);
           if (!metadataURI.reverted) {
-            // Limit tokenURI length to prevent RPC errors with large responses
-            // Some tokens return data exceeding RPC provider limits (>1MB)
-            let uri = metadataURI.value;
-            if (uri.length > 10000) {
-              // Truncate excessively long URIs and add indicator
-              eip721Token.tokenURI = uri.substring(0, 10000) + '...[truncated]';
-            } else {
-              eip721Token.tokenURI = uri;
-            }
+            eip721Token.tokenURI = metadataURI.value;
           } else {
             eip721Token.tokenURI = '';
           }
