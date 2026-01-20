@@ -1,6 +1,6 @@
 {
   "name": "@gu-corp/eip721-subgraph",
-  "version": "1.0.1-build.0",
+  "version": "1.0.0-build.5",
   "description": "EIP-721 Subgraph",
   "scripts": {
     "clean": "rimraf build generated",
