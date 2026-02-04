@@ -1,6 +1,6 @@
 {
   "name": "@gu-corp/eip721-subgraph-react",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "React hooks for EIP721 subgraph",
   "type": "module",
   "main": "./dist/index.cjs",
