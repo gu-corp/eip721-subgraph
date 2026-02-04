@@ -1,6 +1,7 @@
 {
   "name": "@gu-corp/eip721-subgraph",
   "version": "1.0.0-build.5",
+  "private": true,
   "description": "EIP-721 Subgraph for The Graph Protocol",
   "repository": {
     "type": "git",
