@@ -2,9 +2,10 @@
 
 ## Monorepo Structure
 
-This project is a pnpm + Turborepo monorepo with two packages:
+This project is a pnpm + Turborepo monorepo with three packages:
 - `packages/subgraph` - AssemblyScript (The Graph)
 - `packages/client` - TypeScript (Node.js/Browser)
+- `packages/react` - React hooks
 
 ---
 
@@ -229,4 +230,40 @@ pnpm build                                    # Build all
 pnpm --filter @gu-corp/eip721-subgraph build  # Build specific package
 
 # Never use npm or yarn
+```
+
+---
+
+## Git Conventions
+
+### Branch Naming
+
+Branches must follow these naming patterns:
+
+| Pattern | Use Case | Example |
+|---------|----------|---------|
+| `feature/*` | New features | `feature/add-react-hooks` |
+| `fix/*` | Bug fixes | `fix/query-pagination` |
+| `hotfix/*` | Urgent production fixes | `hotfix/critical-bug` |
+| `refactor/*` | Code refactoring | `refactor/consolidate-workflows` |
+| `docs/*` | Documentation updates | `docs/update-readme` |
+| `chore/*` | Maintenance tasks | `chore/update-dependencies` |
+| `release/v*` | Release branches | `release/v1.0.0` |
+| `develop/v*` | Development versions | `develop/v2.0` |
+| `changeset-release/*` | Changeset releases | `changeset-release/main` |
+
+**Protected branches**: `main`, `dev`, `test`, `stage`
+
+### Commit Messages
+
+Follow conventional commits:
+
+```
+type(scope): description
+
+feat(client): add SUBGRAPH_ENDPOINTS
+fix(subgraph): handle null tokenURI
+refactor(ci): consolidate workflows
+docs: update README
+chore: update dependencies
 ```
