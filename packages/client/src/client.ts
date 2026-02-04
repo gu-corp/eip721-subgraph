@@ -9,22 +9,14 @@ export interface SubgraphClientConfig {
 export interface SubgraphEndpoints {
   joc: string;
   jocTestnet: string;
-  mainnet: string;
-  sepolia: string;
 }
 
 /**
  * Default subgraph endpoints for different networks.
- * Update these URLs with your actual deployed subgraph endpoints.
  */
 export const SUBGRAPH_ENDPOINTS: SubgraphEndpoints = {
-  joc: 'https://api.studio.thegraph.com/query/<STUDIO_ID>/eip-721-joc/version/latest',
-  jocTestnet:
-    'https://api.studio.thegraph.com/query/<STUDIO_ID>/eip-721-joc-testnet/version/latest',
-  mainnet:
-    'https://api.studio.thegraph.com/query/<STUDIO_ID>/eip-721-mainnet/version/latest',
-  sepolia:
-    'https://api.studio.thegraph.com/query/<STUDIO_ID>/eip-721-sepolia/version/latest',
+  joc: 'https://api.gu.net/v1/subgraphs/evm/81/eip721',
+  jocTestnet: 'https://api.gu.net/v1/subgraphs/evm/10081/eip721',
 };
 
 /**
