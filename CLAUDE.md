@@ -7,6 +7,7 @@ This file provides guidance to Claude Code (claude.ai/claude-code) when working 
 This is a **monorepo** containing:
 1. **@gu-corp/eip721-subgraph** - EIP-721 (NFT) subgraph for The Graph Protocol
 2. **@gu-corp/eip721-subgraph-client** - TypeScript client library with urql for querying the subgraph
+3. **@gu-corp/eip721-subgraph-react** - React hooks for the subgraph client
 
 The monorepo uses **pnpm workspaces** with **Turborepo** for build orchestration.
 
@@ -23,13 +24,20 @@ eip721-subgraph/
 │   │   ├── abis/                 # Contract ABIs
 │   │   └── generated/            # Auto-generated (do not edit)
 │   │
-│   └── client/                   # @gu-corp/eip721-subgraph-client
+│   ├── client/                   # @gu-corp/eip721-subgraph-client
+│   │   ├── src/
+│   │   │   ├── queries/          # GraphQL queries
+│   │   │   ├── types/            # Generated TypeScript types
+│   │   │   ├── client.ts         # urql client factory
+│   │   │   └── index.ts          # Package exports
+│   │   ├── codegen.ts            # GraphQL codegen config
+│   │   └── package.json
+│   │
+│   └── react/                    # @gu-corp/eip721-subgraph-react
 │       ├── src/
-│       │   ├── queries/          # GraphQL queries
-│       │   ├── types/            # Generated TypeScript types
-│       │   ├── client.ts         # urql client factory
+│       │   ├── hooks/            # React hooks
+│       │   ├── context.tsx       # EIP721Provider context
 │       │   └── index.ts          # Package exports
-│       ├── codegen.ts            # GraphQL codegen config
 │       └── package.json
 │
 ├── docs/                         # Documentation
@@ -68,6 +76,7 @@ pnpm release                # Build and publish packages
 # Run command in specific package
 pnpm --filter @gu-corp/eip721-subgraph <command>
 pnpm --filter @gu-corp/eip721-subgraph-client <command>
+pnpm --filter @gu-corp/eip721-subgraph-react <command>
 ```
 
 ## Key Concepts
@@ -88,6 +97,15 @@ Provides type-safe GraphQL queries:
 - Pre-built queries for common operations
 - urql client factory with network presets
 
+### React Package
+
+Provides React hooks for the subgraph:
+- `EIP721Provider` - Context provider with URL configuration
+- Token hooks: `useToken`, `useTokens`, `useTokensByOwner`, `useTokensByContract`
+- Owner hooks: `useOwner`, `useOwners`, `useOwnerPerTokenContracts`
+- Contract hooks: `useTokenContract`, `useTokenContracts`
+- Statistics: `useGlobalStatistics`
+
 ### Schema Sharing
 
 The client package references `../subgraph/schema.graphql` in codegen.ts. This ensures types are always in sync with the subgraph schema.
@@ -97,7 +115,8 @@ The client package references `../subgraph/schema.graphql` in codegen.ts. This e
 1. Make schema changes in `packages/subgraph/schema.graphql`
 2. Run `pnpm codegen` to regenerate types in both packages
 3. Update queries in `packages/client/src/queries/` if needed
-4. Run `pnpm build` to verify everything compiles
+4. Update hooks in `packages/react/src/hooks/` if needed
+5. Run `pnpm build` to verify everything compiles
 
 ## Important Notes
 
@@ -105,3 +124,4 @@ The client package references `../subgraph/schema.graphql` in codegen.ts. This e
 - Use `pnpm` exclusively (not npm or yarn)
 - Turborepo caches builds - use `pnpm clean` if you encounter stale artifacts
 - The client package has the subgraph schema as a dependency via relative path
+- The react package depends on the client package

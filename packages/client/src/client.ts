@@ -8,7 +8,7 @@ export interface SubgraphClientConfig {
 
 export interface SubgraphEndpoints {
   joc: string;
-  jocTestnet: string;
+  joct: string;
 }
 
 /**
@@ -16,7 +16,7 @@ export interface SubgraphEndpoints {
  */
 export const SUBGRAPH_ENDPOINTS: SubgraphEndpoints = {
   joc: 'https://api.gu.net/v1/subgraphs/evm/81/eip721',
-  jocTestnet: 'https://api.gu.net/v1/subgraphs/evm/10081/eip721',
+  joct: 'https://api.gu.net/v1/subgraphs/evm/10081/eip721',
 };
 
 /**

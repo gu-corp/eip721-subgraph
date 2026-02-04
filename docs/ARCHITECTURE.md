@@ -2,13 +2,14 @@
 
 ## Monorepo Overview
 
-This project is a **pnpm + Turborepo monorepo** containing two packages:
+This project is a **pnpm + Turborepo monorepo** containing three packages:
 
 ```
 eip721-subgraph/
 ├── packages/
 │   ├── subgraph/     # @gu-corp/eip721-subgraph - The Graph indexer
-│   └── client/       # @gu-corp/eip721-subgraph-client - TypeScript client
+│   ├── client/       # @gu-corp/eip721-subgraph-client - TypeScript client
+│   └── react/        # @gu-corp/eip721-subgraph-react - React hooks
 ├── turbo.json        # Build pipeline
 └── pnpm-workspace.yaml
 ```
@@ -26,6 +27,12 @@ eip721-subgraph/
                         │   PostgreSQL     │     │  Client Package  │
                         │   (Entity Store) │     │  (urql + types)  │
                         └──────────────────┘     └──────────────────┘
+                                                        ▲
+                                                        │
+                                                 ┌──────────────────┐
+                                                 │  React Package   │
+                                                 │  (hooks)         │
+                                                 └──────────────────┘
 ```
 
 ## Package: Subgraph
@@ -175,27 +182,101 @@ packages/client/src/types/index.ts
 | `getTokenContracts(pagination)` | Get paginated contracts |
 | `getGlobalStatistics()` | Get global stats |
 
+## Package: React
+
+### Architecture
+
+```
+┌─────────────────────────────────────────────────────┐
+│                   React Package                      │
+├─────────────────────────────────────────────────────┤
+│  ┌─────────────┐  ┌─────────────────────────────┐  │
+│  │   Context   │  │          Hooks              │  │
+│  │─────────────│  │─────────────────────────────│  │
+│  │ EIP721      │  │ useToken, useTokens         │  │
+│  │ Provider    │  │ useTokensByOwner            │  │
+│  │             │  │ useTokensByContract         │  │
+│  │             │  │ useOwner, useOwners         │  │
+│  │             │  │ useOwnerPerTokenContracts   │  │
+│  │             │  │ useTokenContract            │  │
+│  │             │  │ useTokenContracts           │  │
+│  │             │  │ useGlobalStatistics         │  │
+│  └─────────────┘  └─────────────────────────────┘  │
+└─────────────────────────────────────────────────────┘
+```
+
+### React Hooks
+
+| Hook | Description |
+|------|-------------|
+| `useToken(id)` | Fetch single token |
+| `useTokens(options)` | Fetch tokens with pagination |
+| `useTokensByOwner(owner)` | Fetch tokens by owner |
+| `useTokensByContract(contract)` | Fetch tokens by contract |
+| `useOwner(id)` | Fetch single owner |
+| `useOwners(options)` | Fetch owners with pagination |
+| `useOwnerPerTokenContracts(owner)` | Fetch contracts owned by address |
+| `useTokenContract(id)` | Fetch single contract |
+| `useTokenContracts(options)` | Fetch contracts with pagination |
+| `useGlobalStatistics()` | Fetch total contracts, tokens, owners |
+
+### Usage Example
+
+```tsx
+import {
+  EIP721Provider,
+  SUBGRAPH_ENDPOINTS,
+  useTokens
+} from '@gu-corp/eip721-subgraph-react';
+
+function App() {
+  return (
+    <EIP721Provider config={{ url: SUBGRAPH_ENDPOINTS.joc }}>
+      <TokenList />
+    </EIP721Provider>
+  );
+}
+
+function TokenList() {
+  const { data, loading, error } = useTokens({ first: 10, skip: 0 });
+
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error.message}</div>;
+
+  return (
+    <ul>
+      {data?.map(token => (
+        <li key={token.id}>{token.tokenID}</li>
+      ))}
+    </ul>
+  );
+}
+```
+
 ## Supported Networks
 
 Configured in `packages/subgraph/networks.json`:
 
-| Network | Start Block |
-|---------|-------------|
-| mainnet | 0 |
-| sepolia | 0 |
-| joc | 1 |
-| joc-testnet | 1 |
+| Network | Start Block | Endpoint |
+|---------|-------------|----------|
+| joc | 1 | `SUBGRAPH_ENDPOINTS.joc` |
+| joc-testnet | 1 | `SUBGRAPH_ENDPOINTS.joct` |
+| mainnet | 0 | - |
+| sepolia | 0 | - |
 
 ## Build Pipeline (Turborepo)
 
 ```
-codegen ──────────────────────────────┐
-   │                                  │
-   ▼                                  ▼
-subgraph:codegen              client:codegen
-   │                                  │
-   ▼                                  ▼
-subgraph:build                 client:build
+codegen ──────────────────────────────────────────┐
+   │                                              │
+   ▼                                              ▼
+subgraph:codegen                          client:codegen
+   │                                              │
+   ▼                                              ▼
+subgraph:build                            client:build
+                                                  │
+                                                  ▼
+                                           react:build
 ```
 
 ## Performance Considerations
