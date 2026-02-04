@@ -1,12 +1,20 @@
 # Coding Conventions
 
-## Language & Runtime
+## Monorepo Structure
+
+This project is a pnpm + Turborepo monorepo with two packages:
+- `packages/subgraph` - AssemblyScript (The Graph)
+- `packages/client` - TypeScript (Node.js/Browser)
+
+---
+
+## Subgraph Package (AssemblyScript)
+
+### Language & Runtime
 
 - **Language**: AssemblyScript (TypeScript-like syntax for WebAssembly)
 - **Runtime**: The Graph Protocol's graph-ts library
 - **Target**: WebAssembly (WASM)
-
-## AssemblyScript Specifics
 
 ### Type System
 
@@ -43,56 +51,7 @@ if (entity == null) {
 }
 ```
 
-## Naming Conventions
-
-### Files
-- `mapping.ts` - Event handlers
-- `schema.graphql` - Entity definitions
-- `subgraph.yaml` - Manifest
-
-### Entities (PascalCase)
-```graphql
-type TokenContract @entity { ... }
-type OwnerPerTokenContract @entity { ... }
-```
-
-### Fields (camelCase)
-```graphql
-type Token @entity {
-  tokenID: BigInt!
-  mintTime: BigInt!
-}
-```
-
-### Functions (camelCase)
-```typescript
-export function handleTransfer(event: Transfer): void { ... }
-function supportsInterface(contract: EIP721, interfaceId: String): boolean { ... }
-```
-
-### Variables (camelCase)
-```typescript
-let tokenContract = TokenContract.load(contractId);
-let currentOwnerPerTokenContractId = contractId + '_' + from;
-```
-
-## Entity ID Conventions
-
-```typescript
-// Contract address as ID
-let contractId = event.address.toHex();
-
-// Composite IDs with underscore separator
-let tokenId = event.address.toHex() + '_' + tokenId.toString();
-let ownerPerContractId = contractId + '_' + ownerAddress;
-
-// Singleton entities use descriptive string
-let all = All.load('all');
-```
-
-## Contract Interaction Patterns
-
-### Always Use Try-Calls
+### Contract Interaction - Always Use Try-Calls
 
 ```typescript
 // Correct - handles reverts gracefully
@@ -105,60 +64,131 @@ if (!name.reverted) {
 let name = contract.name();  // Dangerous!
 ```
 
-### Interface Detection
+### Entity Update Patterns
 
 ```typescript
-function supportsInterface(
-  contract: EIP721,
-  interfaceId: String,
-  expected: boolean = true,
-): boolean {
-  let supports = contract.try_supportsInterface(toBytes(interfaceId));
-  return !supports.reverted && supports.value == expected;
-}
-```
-
-## Entity Update Patterns
-
-### Load-Create Pattern
-
-```typescript
+// Load-Create Pattern
 let owner = Owner.load(address);
 if (owner == null) {
   owner = new Owner(address);
-  owner.numTokens = ZERO;  // Initialize all fields
+  owner.numTokens = ZERO;
 }
-// Modify and save
 owner.numTokens = owner.numTokens.plus(ONE);
 owner.save();
-```
 
-### Counter Updates
-
-```typescript
-// Increment when count goes from 0 to 1
-if (owner.numTokens.equals(ZERO)) {
-  all.numOwners = all.numOwners.plus(ONE);
-}
-owner.numTokens = owner.numTokens.plus(ONE);
-
-// Decrement when count goes from 1 to 0
-if (owner.numTokens.equals(ONE)) {
-  all.numOwners = all.numOwners.minus(ONE);
-}
-owner.numTokens = owner.numTokens.minus(ONE);
-```
-
-### Entity Removal
-
-```typescript
-// Use store.remove for burning tokens
+// Entity Removal
 store.remove('Token', id);
 ```
 
-## GraphQL Schema Conventions
+---
 
-### Required vs Optional Fields
+## Client Package (TypeScript)
+
+### Language & Runtime
+
+- **Language**: TypeScript
+- **Runtime**: Node.js / Browser
+- **GraphQL Client**: urql
+
+### File Structure
+
+```
+packages/client/src/
+├── client.ts       # urql client factory
+├── index.ts        # Package exports
+├── types/          # Generated types (do not edit)
+│   └── index.ts
+└── queries/        # Query modules
+    ├── index.ts
+    ├── tokens.ts
+    ├── owners.ts
+    ├── contracts.ts
+    └── statistics.ts
+```
+
+### Query Function Pattern
+
+```typescript
+import { gql } from '@urql/core';
+import type { Client } from '@urql/core';
+
+// 1. Define GraphQL document
+export const GetTokenDocument = gql`
+  query GetToken($id: ID!) {
+    token(id: $id) {
+      id
+      tokenID
+      owner { id }
+    }
+  }
+`;
+
+// 2. Define variables interface
+export interface GetTokenVariables {
+  id: string;
+}
+
+// 3. Export async function
+export async function getToken(client: Client, variables: GetTokenVariables) {
+  return client.query(GetTokenDocument, variables).toPromise();
+}
+```
+
+### Client Factory Pattern
+
+```typescript
+import { Client, cacheExchange, fetchExchange } from '@urql/core';
+
+export function createSubgraphClient(config: SubgraphClientConfig): Client {
+  return new Client({
+    url: config.url,
+    exchanges: [cacheExchange, fetchExchange],
+    fetchOptions: () => ({
+      headers: config.headers,
+    }),
+  });
+}
+```
+
+### Type Generation
+
+Types are auto-generated from `schema.graphql` using graphql-codegen:
+
+```bash
+pnpm --filter @gu-corp/eip721-subgraph-client codegen
+```
+
+**Never edit `src/types/index.ts` manually.**
+
+---
+
+## Shared Conventions
+
+### Naming
+
+| Item | Convention | Example |
+|------|------------|---------|
+| Entities | PascalCase | `TokenContract`, `OwnerPerTokenContract` |
+| Fields | camelCase | `tokenID`, `mintTime`, `numTokens` |
+| Functions | camelCase | `handleTransfer`, `getToken` |
+| Files | kebab-case or camelCase | `mapping.ts`, `tokens.ts` |
+| Constants | UPPER_SNAKE_CASE | `ZERO_ADDRESS_STRING` |
+
+### Entity ID Conventions
+
+```typescript
+// Contract address as ID
+let contractId = event.address.toHex();
+
+// Composite IDs with underscore separator
+let tokenId = contractAddress + '_' + tokenId.toString();
+let ownerPerContractId = contractId + '_' + ownerAddress;
+
+// Singleton entities use descriptive string
+let all = All.load('all');
+```
+
+### GraphQL Schema
 
 ```graphql
 type TokenContract @entity {
@@ -166,46 +196,37 @@ type TokenContract @entity {
   name: String                               # Optional (no !)
   symbol: String                             # Optional
   numTokens: BigInt!                         # Required
+  tokens: [Token!]! @derivedFrom(field: "contract")  # Derived
 }
 ```
-
-### Derived Fields
-
-```graphql
-type TokenContract @entity {
-  tokens: [Token!]! @derivedFrom(field: "contract")  # Derived from Token.contract
-}
-```
-
-## Code Organization
 
 ### Import Order
 
 ```typescript
-// 1. graph-ts imports
-import { store, Bytes, BigInt } from '@graphprotocol/graph-ts';
+// 1. External packages
+import { gql } from '@urql/core';
+import type { Client } from '@urql/core';
 
-// 2. Generated contract imports
-import { Transfer, EIP721 } from '../generated/EIP721/EIP721';
+// 2. Internal types
+import type { Token, Owner } from '../types';
 
-// 3. Generated entity imports
-import { Token, TokenContract, Owner, All } from '../generated/schema';
+// 3. Internal modules
+import { createSubgraphClient } from '../client';
 ```
 
-### Function Order
+---
 
-1. Module-level constants
-2. Helper functions
-3. Exported event handlers
+## Package Manager
 
-## Comments
+Use **pnpm** exclusively:
 
-```typescript
-// Use for clarifying non-obvious logic
-if (from != ZERO_ADDRESS_STRING) {
-  // existing token transfer, not minting
-}
+```bash
+# Install dependencies
+pnpm install
 
-// Commented debug logging (keep for future debugging)
-// log.error('contract : {}',[event.address.toHexString()]);
+# Run workspace commands
+pnpm build                                    # Build all
+pnpm --filter @gu-corp/eip721-subgraph build  # Build specific package
+
+# Never use npm or yarn
 ```

@@ -1,25 +1,36 @@
 # Architecture
 
-## System Overview
+## Monorepo Overview
 
-This subgraph is built on The Graph Protocol and indexes ERC-721 (NFT) Transfer events from any contract on the target blockchain. It provides a queryable GraphQL API for NFT ownership data.
+This project is a **pnpm + Turborepo monorepo** containing two packages:
+
+```
+eip721-subgraph/
+├── packages/
+│   ├── subgraph/     # @gu-corp/eip721-subgraph - The Graph indexer
+│   └── client/       # @gu-corp/eip721-subgraph-client - TypeScript client
+├── turbo.json        # Build pipeline
+└── pnpm-workspace.yaml
+```
+
+## System Overview
 
 ```
 ┌─────────────────┐     ┌──────────────────┐     ┌─────────────────┐
 │   Blockchain    │────▶│   Graph Node     │────▶│   GraphQL API   │
 │  (ERC-721 TXs)  │     │  (Indexing)      │     │   (Queries)     │
 └─────────────────┘     └──────────────────┘     └─────────────────┘
-                               │
-                               ▼
-                        ┌──────────────────┐
-                        │   PostgreSQL     │
-                        │   (Entity Store) │
-                        └──────────────────┘
+                               │                        ▲
+                               ▼                        │
+                        ┌──────────────────┐     ┌──────────────────┐
+                        │   PostgreSQL     │     │  Client Package  │
+                        │   (Entity Store) │     │  (urql + types)  │
+                        └──────────────────┘     └──────────────────┘
 ```
 
-## Data Flow
+## Package: Subgraph
 
-### Event Processing Pipeline
+### Data Flow
 
 ```
 Transfer Event
@@ -58,7 +69,7 @@ Transfer Event
 └─────────────────────────────────────┘
 ```
 
-## Entity Relationships
+### Entity Relationships
 
 ```
 ┌─────────────┐
@@ -94,7 +105,7 @@ Transfer Event
 └───────────────────────────┘
 ```
 
-## EIP-721 Compliance Validation
+### EIP-721 Compliance Validation
 
 Before indexing a contract, the subgraph validates EIP-721 compliance:
 
@@ -111,7 +122,7 @@ Optional metadata support is detected via:
 supportsInterface(0x5b5e139f) == true   // EIP-721 Metadata
 ```
 
-## ID Schemes
+### ID Schemes
 
 | Entity | ID Format | Example |
 |--------|-----------|---------|
@@ -121,16 +132,71 @@ supportsInterface(0x5b5e139f) == true   // EIP-721 Metadata
 | Owner | `{address}` | `"0xdef...456"` |
 | OwnerPerTokenContract | `{contract}_{owner}` | `"0xabc...123_0xdef...456"` |
 
+## Package: Client
+
+### Architecture
+
+```
+┌─────────────────────────────────────────────────────┐
+│                  Client Package                      │
+├─────────────────────────────────────────────────────┤
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐ │
+│  │   Types     │  │   Queries   │  │   Client    │ │
+│  │  (codegen)  │  │ (tokens,    │  │ (urql +     │ │
+│  │             │  │  owners,    │  │  presets)   │ │
+│  │             │  │  contracts) │  │             │ │
+│  └─────────────┘  └─────────────┘  └─────────────┘ │
+└─────────────────────────────────────────────────────┘
+```
+
+### Type Generation Flow
+
+```
+packages/subgraph/schema.graphql
+            │
+            ▼
+    graphql-codegen
+            │
+            ▼
+packages/client/src/types/index.ts
+```
+
+### Query Functions
+
+| Function | Description |
+|----------|-------------|
+| `getToken(id)` | Get single token by ID |
+| `getTokens(pagination)` | Get paginated tokens |
+| `getTokensByOwner(owner)` | Get tokens owned by address |
+| `getTokensByContract(contract)` | Get tokens from contract |
+| `getOwner(id)` | Get owner by address |
+| `getOwners(pagination)` | Get paginated owners |
+| `getTokenContract(id)` | Get contract metadata |
+| `getTokenContracts(pagination)` | Get paginated contracts |
+| `getGlobalStatistics()` | Get global stats |
+
 ## Supported Networks
 
-Configured in `networks.json`:
+Configured in `packages/subgraph/networks.json`:
 
 | Network | Start Block |
 |---------|-------------|
 | mainnet | 0 |
 | sepolia | 0 |
-| joc | 0 |
-| joc-testnet | 0 |
+| joc | 1 |
+| joc-testnet | 1 |
+
+## Build Pipeline (Turborepo)
+
+```
+codegen ──────────────────────────────┐
+   │                                  │
+   ▼                                  ▼
+subgraph:codegen              client:codegen
+   │                                  │
+   ▼                                  ▼
+subgraph:build                 client:build
+```
 
 ## Performance Considerations
 
@@ -138,3 +204,4 @@ Configured in `networks.json`:
 2. **Try-call pattern**: All contract calls use `try_*` methods to handle reverts gracefully
 3. **Singleton pattern**: Global stats stored in single "all" entity to minimize reads
 4. **Derived fields**: Token lists use `@derivedFrom` to avoid storing arrays
+5. **Turborepo caching**: Build outputs cached for faster rebuilds

@@ -1,0 +1,44 @@
+{
+  "name": "@gu-corp/eip721-subgraph",
+  "version": "1.0.0-build.5",
+  "description": "EIP-721 Subgraph for The Graph Protocol",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/gu-corp/eip721-subgraph",
+    "directory": "packages/subgraph"
+  },
+  "publishConfig": {
+    "access": "restricted",
+    "registry": "https://npm.pkg.github.com"
+  },
+  "files": [
+    "src",
+    "schema.graphql",
+    "subgraph.yaml",
+    "networks.json",
+    "abis"
+  ],
+  "scripts": {
+    "clean": "rimraf build generated",
+    "auth": "graph auth",
+    "remove": "graph remove",
+    "create": "graph create",
+    "codegen": "graph codegen",
+    "build": "graph build",
+    "build:joc": "graph build --network joc",
+    "build:joc-testnet": "graph build --network joc-testnet",
+    "build:mainnet": "graph build --network mainnet",
+    "build:sepolia": "graph build --network sepolia",
+    "deploy": "graph deploy",
+    "deploy:joc": "npm run codegen && npm run build:joc",
+    "deploy:joc-testnet": "npm run codegen && npm run build:joc-testnet",
+    "deploy:mainnet": "npm run codegen && npm run build:mainnet",
+    "deploy:sepolia": "npm run codegen && npm run build:sepolia",
+    "graph": "graph"
+  },
+  "devDependencies": {
+    "@graphprotocol/graph-cli": "^0.96.0",
+    "@graphprotocol/graph-ts": "^0.38.1",
+    "rimraf": "^5.0.5"
+  }
+}

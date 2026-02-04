@@ -1,19 +1,30 @@
 {
-  "name": "@gu-corp/eip721-subgraph",
-  "version": "1.0.0-build.5",
-  "description": "EIP-721 Subgraph",
+  "name": "@gu-corp/eip721-subgraph-monorepo",
+  "version": "0.0.0",
+  "private": true,
+  "description": "EIP-721 Subgraph Monorepo",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/gu-corp/eip721-subgraph"
+  },
   "scripts": {
-    "clean": "rimraf build generated",
-    "auth": "graph auth",
-    "remove": "graph remove",
-    "create": "graph create",
-    "codegen": "graph codegen",
-    "build": "graph build",
-    "deploy": "graph deploy",
-    "graph": "graph"
+    "build": "turbo run build",
+    "clean": "turbo run clean && rm -rf node_modules .turbo",
+    "codegen": "turbo run codegen",
+    "typecheck": "turbo run typecheck",
+    "format": "prettier --write \"**/*.{ts,tsx,md,json,yaml}\"",
+    "changeset": "changeset",
+    "version": "changeset version",
+    "release": "pnpm build && changeset publish"
   },
   "devDependencies": {
-    "@graphprotocol/graph-cli": "^0.96.0",
-    "@graphprotocol/graph-ts": "^0.38.1"
+    "@changesets/cli": "^2.27.0",
+    "prettier": "^3.2.5",
+    "turbo": "^2.3.0"
+  },
+  "packageManager": "pnpm@9.0.0",
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=9.0.0"
   }
 }
