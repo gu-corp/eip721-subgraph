@@ -1,23 +1,28 @@
-name: CI
+name: Verify subgraph pull request
 on:
-  push:
-    branches: [main, dev]
   pull_request:
-    branches: [main, dev]
+    branches:
+      - main
+      - dev
+    paths:
+      - packages/subgraph/**
+      - .github/workflows/verify-subgraph-pull-request.yml
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.ref }}-${{ github.actor }}
   cancel-in-progress: true
 
 jobs:
   build:
-    name: Build & Test
+    name: Build subgraph
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - uses: pnpm/action-setup@v3
         with:
           version: 9
+
       - uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -27,10 +32,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Run codegen
-        run: pnpm codegen
+        run: pnpm --filter @gu-corp/eip721-subgraph codegen
 
-      - name: Build all packages
-        run: pnpm build
-
-      - name: Type check client
-        run: pnpm --filter @gu-corp/eip721-subgraph-client typecheck
+      - name: Build subgraph
+        run: pnpm --filter @gu-corp/eip721-subgraph build

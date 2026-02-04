@@ -1,0 +1,99 @@
+name: Deploy subgraph
+run-name: Deploy eip721 subgraph ${{ github.ref_name }} for ${{ inputs.network }} by @${{ github.actor }}
+on:
+  workflow_dispatch:
+    inputs:
+      network:
+        description: 'Network to deploy to'
+        required: true
+        type: choice
+        options:
+          - joc
+          - joc-testnet
+          - mainnet
+          - sepolia
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}-${{ inputs.network }}
+  cancel-in-progress: true
+
+jobs:
+  deploy-joc:
+    name: Deploy to JOC
+    if: ${{ inputs.network == 'joc' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v3
+        with:
+          version: 9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @gu-corp/eip721-subgraph clean
+      - run: pnpm --filter @gu-corp/eip721-subgraph codegen
+      - run: pnpm --filter @gu-corp/eip721-subgraph build -- --network joc
+      - run: pnpm --filter @gu-corp/eip721-subgraph graph auth ${{ secrets.THE_GRAPH_EIP_721_JOC_DEPLOY_KEY }}
+      - run: pnpm --filter @gu-corp/eip721-subgraph graph deploy eip-721-joc --node https://api.studio.thegraph.com/deploy/ --version-label ${{ github.ref_name }}
+
+  deploy-joc-testnet:
+    name: Deploy to JOC Testnet
+    if: ${{ inputs.network == 'joc-testnet' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v3
+        with:
+          version: 9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @gu-corp/eip721-subgraph clean
+      - run: pnpm --filter @gu-corp/eip721-subgraph codegen
+      - run: pnpm --filter @gu-corp/eip721-subgraph build -- --network joc-testnet
+      - run: pnpm --filter @gu-corp/eip721-subgraph graph auth ${{ secrets.THE_GRAPH_EIP_721_JOC_TESTNET_DEPLOY_KEY }}
+      - run: pnpm --filter @gu-corp/eip721-subgraph graph deploy eip-721-joc-testnet --node https://api.studio.thegraph.com/deploy/ --version-label ${{ github.ref_name }}
+
+  deploy-mainnet:
+    name: Deploy to Mainnet
+    if: ${{ inputs.network == 'mainnet' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v3
+        with:
+          version: 9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @gu-corp/eip721-subgraph clean
+      - run: pnpm --filter @gu-corp/eip721-subgraph codegen
+      - run: pnpm --filter @gu-corp/eip721-subgraph build -- --network mainnet
+      - run: pnpm --filter @gu-corp/eip721-subgraph graph auth ${{ secrets.THE_GRAPH_EIP_721_MAINNET_DEPLOY_KEY }}
+      - run: pnpm --filter @gu-corp/eip721-subgraph graph deploy eip-721-mainnet --node https://api.studio.thegraph.com/deploy/ --version-label ${{ github.ref_name }}
+
+  deploy-sepolia:
+    name: Deploy to Sepolia
+    if: ${{ inputs.network == 'sepolia' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v3
+        with:
+          version: 9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @gu-corp/eip721-subgraph clean
+      - run: pnpm --filter @gu-corp/eip721-subgraph codegen
+      - run: pnpm --filter @gu-corp/eip721-subgraph build -- --network sepolia
+      - run: pnpm --filter @gu-corp/eip721-subgraph graph auth ${{ secrets.THE_GRAPH_EIP_721_SEPOLIA_DEPLOY_KEY }}
+      - run: pnpm --filter @gu-corp/eip721-subgraph graph deploy eip-721-sepolia --node https://api.studio.thegraph.com/deploy/ --version-label ${{ github.ref_name }}
