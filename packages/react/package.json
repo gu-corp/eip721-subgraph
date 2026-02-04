@@ -1,0 +1,52 @@
+{
+  "name": "@gu-corp/eip721-subgraph-react",
+  "version": "0.0.0",
+  "description": "React hooks for EIP721 subgraph",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "clean": "rm -rf dist",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "nft",
+    "react",
+    "hooks",
+    "subgraph",
+    "erc721",
+    "eip721",
+    "the-graph"
+  ],
+  "author": "GU Technologies",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/gu-corp/eip721-subgraph.git",
+    "directory": "packages/react"
+  },
+  "peerDependencies": {
+    "react": ">=17.0.0"
+  },
+  "dependencies": {
+    "@gu-corp/eip721-subgraph-client": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.0",
+    "react": "^18.2.0",
+    "tsup": "^8.0.0",
+    "typescript": "^5.3.0"
+  }
+}

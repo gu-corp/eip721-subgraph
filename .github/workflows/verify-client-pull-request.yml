@@ -1,0 +1,42 @@
+name: Verify client pull request
+on:
+  pull_request:
+    branches:
+      - main
+      - dev
+    paths:
+      - packages/client/**
+      - packages/subgraph/schema.graphql
+      - .github/workflows/verify-client-pull-request.yml
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}-${{ github.actor }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build and test client
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v3
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run codegen
+        run: pnpm --filter @gu-corp/eip721-subgraph-client codegen
+
+      - name: Build client
+        run: pnpm --filter @gu-corp/eip721-subgraph-client build
+
+      - name: Type check
+        run: pnpm --filter @gu-corp/eip721-subgraph-client typecheck

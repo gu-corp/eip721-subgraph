@@ -11,12 +11,12 @@
   },
   "joc": {
     "EIP721": {
-      "startBlock": 0
+      "startBlock": 1
     }
   },
   "joc-testnet": {
     "EIP721": {
-      "startBlock": 0
+      "startBlock": 1
     }
   }
 }
