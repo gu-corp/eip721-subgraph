@@ -39,10 +39,13 @@ export function useTokenWithMetadata(
   id: string | null | undefined,
   options: GetTokenWithMetadataOptions = {}
 ): UseQueryResult<TokenWithMetadata> {
-  const { client } = useEIP721Context();
+  const { client, metadataOptions } = useEIP721Context();
   const [data, setData] = useState<TokenWithMetadata | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
+
+  // Merge provider options with hook-specific options (hook options take precedence)
+  const mergedOptions = { ...metadataOptions, ...options };
 
   const fetchData = useCallback(async () => {
     if (!id) {
@@ -56,7 +59,7 @@ export function useTokenWithMetadata(
     setError(null);
 
     try {
-      const result = await getTokenWithMetadata(client, { id }, options);
+      const result = await getTokenWithMetadata(client, { id }, mergedOptions);
       if (result.error) {
         throw result.error;
       }
@@ -66,7 +69,7 @@ export function useTokenWithMetadata(
     } finally {
       setLoading(false);
     }
-  }, [id, client]);
+  }, [id, client, mergedOptions]);
 
   useEffect(() => {
     fetchData();
@@ -87,17 +90,20 @@ export function useTokensWithMetadata(
   variables: GetTokensVariables = { first: 10, skip: 0 },
   options: GetTokenWithMetadataOptions = {}
 ): UseQueryResult<TokenWithMetadata[]> {
-  const { client } = useEIP721Context();
+  const { client, metadataOptions } = useEIP721Context();
   const [data, setData] = useState<TokenWithMetadata[] | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
+
+  // Merge provider options with hook-specific options (hook options take precedence)
+  const mergedOptions = { ...metadataOptions, ...options };
 
   const fetchData = useCallback(async () => {
     setLoading(true);
     setError(null);
 
     try {
-      const result = await getTokensWithMetadata(client, variables, options);
+      const result = await getTokensWithMetadata(client, variables, mergedOptions);
       if (result.error) {
         throw result.error;
       }
@@ -107,7 +113,7 @@ export function useTokensWithMetadata(
     } finally {
       setLoading(false);
     }
-  }, [variables.first, variables.skip, variables.orderBy, variables.orderDirection, client]);
+  }, [variables.first, variables.skip, variables.orderBy, variables.orderDirection, client, mergedOptions]);
 
   useEffect(() => {
     fetchData();
@@ -129,11 +135,14 @@ export function useTokensByOwnerWithMetadata(
   pagination: { first?: number; skip?: number } = {},
   options: GetTokenWithMetadataOptions = {}
 ): UseQueryResult<TokenWithMetadata[]> {
-  const { client } = useEIP721Context();
+  const { client, metadataOptions } = useEIP721Context();
   const [data, setData] = useState<TokenWithMetadata[] | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const { first = 10, skip = 0 } = pagination;
+
+  // Merge provider options with hook-specific options (hook options take precedence)
+  const mergedOptions = { ...metadataOptions, ...options };
 
   const fetchData = useCallback(async () => {
     if (!owner) {
@@ -150,7 +159,7 @@ export function useTokensByOwnerWithMetadata(
       const result = await getTokensByOwnerWithMetadata(
         client,
         { owner, first, skip },
-        options
+        mergedOptions
       );
       if (result.error) {
         throw result.error;
@@ -161,7 +170,7 @@ export function useTokensByOwnerWithMetadata(
     } finally {
       setLoading(false);
     }
-  }, [owner, first, skip, client]);
+  }, [owner, first, skip, client, mergedOptions]);
 
   useEffect(() => {
     fetchData();
@@ -183,11 +192,14 @@ export function useTokensByContractWithMetadata(
   pagination: { first?: number; skip?: number } = {},
   options: GetTokenWithMetadataOptions = {}
 ): UseQueryResult<TokenWithMetadata[]> {
-  const { client } = useEIP721Context();
+  const { client, metadataOptions } = useEIP721Context();
   const [data, setData] = useState<TokenWithMetadata[] | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const { first = 10, skip = 0 } = pagination;
+
+  // Merge provider options with hook-specific options (hook options take precedence)
+  const mergedOptions = { ...metadataOptions, ...options };
 
   const fetchData = useCallback(async () => {
     if (!contract) {
@@ -204,7 +216,7 @@ export function useTokensByContractWithMetadata(
       const result = await getTokensByContractWithMetadata(
         client,
         { contract, first, skip },
-        options
+        mergedOptions
       );
       if (result.error) {
         throw result.error;
@@ -215,7 +227,7 @@ export function useTokensByContractWithMetadata(
     } finally {
       setLoading(false);
     }
-  }, [contract, first, skip, client]);
+  }, [contract, first, skip, client, mergedOptions]);
 
   useEffect(() => {
     fetchData();

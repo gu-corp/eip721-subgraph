@@ -28,6 +28,7 @@ eip721-subgraph/
 │   │   ├── src/
 │   │   │   ├── queries/          # GraphQL queries
 │   │   │   ├── types/            # Generated TypeScript types
+│   │   │   ├── metadata/         # Metadata fetching module
 │   │   │   ├── client.ts         # urql client factory
 │   │   │   └── index.ts          # Package exports
 │   │   ├── codegen.ts            # GraphQL codegen config
@@ -96,15 +97,38 @@ Provides type-safe GraphQL queries:
 - Auto-generated TypeScript types from schema.graphql
 - Pre-built queries for common operations
 - urql client factory with network presets
+- **Metadata fetching** with IPFS/Arweave gateway fallback and caching
+
+Metadata functions:
+- `fetchTokenMetadata(uri, options)` - Fetch metadata from tokenURI
+- `getTokenWithMetadata(id)` - Get token with fetched metadata
+- `getTokensWithMetadata(pagination)` - Get tokens with metadata
+- `getTokensByOwnerWithMetadata(owner)` - Get tokens by owner with metadata
+- `getTokensByContractWithMetadata(contract)` - Get tokens by contract with metadata
 
 ### React Package
 
 Provides React hooks for the subgraph:
-- `EIP721Provider` - Context provider with URL configuration
+- `EIP721Provider` - Context provider with URL and metadata configuration
 - Token hooks: `useToken`, `useTokens`, `useTokensByOwner`, `useTokensByContract`
+- **Metadata hooks**: `useTokenMetadata`, `useTokenWithMetadata`, `useTokensWithMetadata`, `useTokensByOwnerWithMetadata`, `useTokensByContractWithMetadata`
 - Owner hooks: `useOwner`, `useOwners`, `useOwnerPerTokenContracts`
 - Contract hooks: `useTokenContract`, `useTokenContracts`
 - Statistics: `useGlobalStatistics`
+
+Provider metadata configuration (optional):
+```tsx
+<EIP721Provider config={{
+  url: SUBGRAPH_ENDPOINTS.joc,
+  metadata: {
+    ipfsGateways: ['https://my-gateway.com/ipfs/'],
+    arweaveGateways: ['https://arweave.net/'],
+    timeout: 10000,
+    cache: 'localStorage', // 'memory' | 'localStorage' | 'none'
+    ttl: 3600000,
+  }
+}}>
+```
 
 ### Schema Sharing
 

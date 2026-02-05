@@ -4,6 +4,7 @@ import {
   type NFTMetadata,
   type FetchMetadataOptions,
 } from '@gu-corp/eip721-subgraph-client';
+import { useEIP721Context } from '../context';
 
 interface UseTokenMetadataResult {
   data: NFTMetadata | null;
@@ -22,12 +23,12 @@ interface UseTokenMetadataResult {
  *
  * @example
  * ```tsx
- * // Basic usage
+ * // Basic usage (uses provider's global gateway config)
  * const { data, loading, error } = useTokenMetadata('ipfs://Qm.../metadata.json');
  *
- * // With options
+ * // With options (overrides provider config)
  * const { data, loading } = useTokenMetadata(tokenURI, {
- *   ipfsGateway: 'https://cloudflare-ipfs.com/ipfs/',
+ *   ipfsGateways: ['https://my-gateway.com/ipfs/'],
  *   timeout: 10000,
  * });
  *
@@ -41,9 +42,13 @@ export function useTokenMetadata(
   tokenURI: string | null | undefined,
   options: FetchMetadataOptions = {}
 ): UseTokenMetadataResult {
+  const { metadataOptions } = useEIP721Context();
   const [data, setData] = useState<NFTMetadata | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
+
+  // Merge provider options with hook-specific options (hook options take precedence)
+  const mergedOptions = { ...metadataOptions, ...options };
 
   const fetchData = useCallback(async () => {
     if (!tokenURI) {
@@ -57,14 +62,14 @@ export function useTokenMetadata(
     setError(null);
 
     try {
-      const metadata = await fetchTokenMetadata(tokenURI, options);
+      const metadata = await fetchTokenMetadata(tokenURI, mergedOptions);
       setData(metadata);
     } catch (err) {
       setError(err instanceof Error ? err : new Error(String(err)));
     } finally {
       setLoading(false);
     }
-  }, [tokenURI]);
+  }, [tokenURI, mergedOptions]);
 
   useEffect(() => {
     fetchData();
