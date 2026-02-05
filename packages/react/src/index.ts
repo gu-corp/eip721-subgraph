@@ -8,6 +8,13 @@ export {
   useTokens,
   useTokensByOwner,
   useTokensByContract,
+  // Token with metadata hooks
+  useTokenWithMetadata,
+  useTokensWithMetadata,
+  useTokensByOwnerWithMetadata,
+  useTokensByContractWithMetadata,
+  // Metadata hook (standalone)
+  useTokenMetadata,
   // Owner hooks
   useOwner,
   useOwners,
