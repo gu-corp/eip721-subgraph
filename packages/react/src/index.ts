@@ -1,5 +1,11 @@
 // Context and provider
-export { EIP721Provider, useEIP721Context, type EIP721ProviderConfig, type EIP721ProviderProps } from './context';
+export {
+  EIP721Provider,
+  useEIP721Context,
+  type EIP721ProviderConfig,
+  type EIP721ProviderProps,
+  type MetadataConfig,
+} from './context';
 
 // Hooks
 export {
@@ -8,6 +14,13 @@ export {
   useTokens,
   useTokensByOwner,
   useTokensByContract,
+  // Token with metadata hooks
+  useTokenWithMetadata,
+  useTokensWithMetadata,
+  useTokensByOwnerWithMetadata,
+  useTokensByContractWithMetadata,
+  // Metadata hook (standalone)
+  useTokenMetadata,
   // Owner hooks
   useOwner,
   useOwners,

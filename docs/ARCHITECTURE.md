@@ -144,16 +144,16 @@ supportsInterface(0x5b5e139f) == true   // EIP-721 Metadata
 ### Architecture
 
 ```
-┌─────────────────────────────────────────────────────┐
-│                  Client Package                      │
-├─────────────────────────────────────────────────────┤
-│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐ │
-│  │   Types     │  │   Queries   │  │   Client    │ │
-│  │  (codegen)  │  │ (tokens,    │  │ (urql +     │ │
-│  │             │  │  owners,    │  │  presets)   │ │
-│  │             │  │  contracts) │  │             │ │
-│  └─────────────┘  └─────────────┘  └─────────────┘ │
-└─────────────────────────────────────────────────────┘
+┌───────────────────────────────────────────────────────────────┐
+│                       Client Package                           │
+├───────────────────────────────────────────────────────────────┤
+│  ┌───────────┐  ┌───────────┐  ┌───────────┐  ┌───────────┐  │
+│  │   Types   │  │  Queries  │  │  Client   │  │ Metadata  │  │
+│  │ (codegen) │  │ (tokens,  │  │ (urql +   │  │ (fetcher, │  │
+│  │           │  │  owners,  │  │  presets) │  │  cache)   │  │
+│  │           │  │  stats)   │  │           │  │           │  │
+│  └───────────┘  └───────────┘  └───────────┘  └───────────┘  │
+└───────────────────────────────────────────────────────────────┘
 ```
 
 ### Type Generation Flow
@@ -176,43 +176,117 @@ packages/client/src/types/index.ts
 | `getTokens(pagination)` | Get paginated tokens |
 | `getTokensByOwner(owner)` | Get tokens owned by address |
 | `getTokensByContract(contract)` | Get tokens from contract |
+| `getTokenWithMetadata(id)` | Get token with fetched metadata |
+| `getTokensWithMetadata(pagination)` | Get tokens with metadata |
+| `getTokensByOwnerWithMetadata(owner)` | Get tokens by owner with metadata |
+| `getTokensByContractWithMetadata(contract)` | Get tokens by contract with metadata |
 | `getOwner(id)` | Get owner by address |
 | `getOwners(pagination)` | Get paginated owners |
 | `getTokenContract(id)` | Get contract metadata |
 | `getTokenContracts(pagination)` | Get paginated contracts |
 | `getGlobalStatistics()` | Get global stats |
 
+### Metadata Fetching
+
+The client package includes a metadata module for fetching NFT metadata from tokenURIs:
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                    Metadata Module                               │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                  │
+│  tokenURI ──▶ resolveTokenURI() ──▶ fetchWithTimeout()          │
+│                     │                      │                     │
+│                     ▼                      ▼                     │
+│              ┌─────────────┐        ┌─────────────┐             │
+│              │  Gateway    │        │   Cache     │             │
+│              │  Fallback   │        │  (memory/   │             │
+│              │  (IPFS,     │        │  localStorage)            │
+│              │   Arweave)  │        │             │             │
+│              └─────────────┘        └─────────────┘             │
+│                                                                  │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+**Supported URI Protocols:**
+- `ipfs://` - IPFS protocol (uses gateway fallback)
+- `/ipfs/` - IPFS path format
+- `ar://` - Arweave protocol
+- `data:` - Data URIs (base64 and JSON)
+- `http://`, `https://` - Direct HTTP(S) URLs
+
+**Default IPFS Gateways:**
+- `https://ipfs.io/ipfs/`
+- `https://cloudflare-ipfs.com/ipfs/`
+- `https://gateway.pinata.cloud/ipfs/`
+- `https://dweb.link/ipfs/`
+- `https://w3s.link/ipfs/`
+- `https://4everland.io/ipfs/`
+- `https://ipfs.filebase.io/ipfs/`
+- `https://flk-ipfs.xyz/ipfs/`
+- `https://ipfs.runfission.com/ipfs/`
+
+**Metadata Functions:**
+
+| Function | Description |
+|----------|-------------|
+| `fetchTokenMetadata(uri, options)` | Fetch metadata from tokenURI |
+| `resolveTokenURI(uri, options)` | Convert URI to HTTP URLs |
+| `createMetadataFetcher(config)` | Create reusable fetcher with config |
+| `createMemoryCache(ttl)` | Create in-memory cache |
+| `createLocalStorageCache(prefix, ttl)` | Create localStorage cache |
+
 ## Package: React
 
 ### Architecture
 
 ```
-┌─────────────────────────────────────────────────────┐
-│                   React Package                      │
-├─────────────────────────────────────────────────────┤
-│  ┌─────────────┐  ┌─────────────────────────────┐  │
-│  │   Context   │  │          Hooks              │  │
-│  │─────────────│  │─────────────────────────────│  │
-│  │ EIP721      │  │ useToken, useTokens         │  │
-│  │ Provider    │  │ useTokensByOwner            │  │
-│  │             │  │ useTokensByContract         │  │
-│  │             │  │ useOwner, useOwners         │  │
-│  │             │  │ useOwnerPerTokenContracts   │  │
-│  │             │  │ useTokenContract            │  │
-│  │             │  │ useTokenContracts           │  │
-│  │             │  │ useGlobalStatistics         │  │
-│  └─────────────┘  └─────────────────────────────┘  │
-└─────────────────────────────────────────────────────┘
+┌───────────────────────────────────────────────────────────────────┐
+│                        React Package                               │
+├───────────────────────────────────────────────────────────────────┤
+│  ┌───────────────────┐  ┌───────────────────────────────────────┐│
+│  │      Context      │  │              Hooks                    ││
+│  │───────────────────│  │───────────────────────────────────────││
+│  │ EIP721Provider    │  │ Token: useToken, useTokens            ││
+│  │  - url            │  │        useTokensByOwner/Contract      ││
+│  │  - metadata config│  │                                       ││
+│  │    - ipfsGateways │  │ Metadata: useTokenWithMetadata        ││
+│  │    - arweaveGws   │  │           useTokensWithMetadata       ││
+│  │    - timeout      │  │           useTokensByOwner/Contract-  ││
+│  │    - cache        │  │               WithMetadata            ││
+│  │    - ttl          │  │           useTokenMetadata            ││
+│  │                   │  │                                       ││
+│  │                   │  │ Owner: useOwner, useOwners            ││
+│  │                   │  │        useOwnerPerTokenContracts      ││
+│  │                   │  │                                       ││
+│  │                   │  │ Contract: useTokenContract(s)         ││
+│  │                   │  │ Stats: useGlobalStatistics            ││
+│  └───────────────────┘  └───────────────────────────────────────┘│
+└───────────────────────────────────────────────────────────────────┘
 ```
 
 ### React Hooks
 
+**Token Hooks:**
 | Hook | Description |
 |------|-------------|
 | `useToken(id)` | Fetch single token |
 | `useTokens(options)` | Fetch tokens with pagination |
 | `useTokensByOwner(owner)` | Fetch tokens by owner |
 | `useTokensByContract(contract)` | Fetch tokens by contract |
+
+**Metadata Hooks:**
+| Hook | Description |
+|------|-------------|
+| `useTokenMetadata(tokenURI)` | Fetch metadata from tokenURI directly |
+| `useTokenWithMetadata(id)` | Fetch token with metadata |
+| `useTokensWithMetadata(options)` | Fetch tokens with metadata |
+| `useTokensByOwnerWithMetadata(owner)` | Fetch tokens by owner with metadata |
+| `useTokensByContractWithMetadata(contract)` | Fetch tokens by contract with metadata |
+
+**Other Hooks:**
+| Hook | Description |
+|------|-------------|
 | `useOwner(id)` | Fetch single owner |
 | `useOwners(options)` | Fetch owners with pagination |
 | `useOwnerPerTokenContracts(owner)` | Fetch contracts owned by address |
@@ -222,6 +296,7 @@ packages/client/src/types/index.ts
 
 ### Usage Example
 
+**Basic usage:**
 ```tsx
 import {
   EIP721Provider,
@@ -249,6 +324,78 @@ function TokenList() {
         <li key={token.id}>{token.tokenID}</li>
       ))}
     </ul>
+  );
+}
+```
+
+**With global metadata configuration:**
+```tsx
+import {
+  EIP721Provider,
+  SUBGRAPH_ENDPOINTS,
+  useTokensWithMetadata
+} from '@gu-corp/eip721-subgraph-react';
+
+function App() {
+  return (
+    <EIP721Provider
+      config={{
+        url: SUBGRAPH_ENDPOINTS.joc,
+        metadata: {
+          ipfsGateways: ['https://my-gateway.com/ipfs/', 'https://ipfs.io/ipfs/'],
+          timeout: 15000,
+          cache: 'localStorage',
+          ttl: 3600000, // 1 hour
+        },
+      }}
+    >
+      <NFTGallery />
+    </EIP721Provider>
+  );
+}
+
+function NFTGallery() {
+  const { data, loading } = useTokensWithMetadata({ first: 10, skip: 0 });
+
+  return (
+    <div>
+      {data?.map(token => (
+        <div key={token.id}>
+          <img src={token.metadata?.image} alt={token.metadata?.name} />
+          <p>{token.metadata?.name}</p>
+        </div>
+      ))}
+    </div>
+  );
+}
+```
+
+**Progressive loading pattern (for better performance):**
+```tsx
+function TokenCard({ tokenURI }: { tokenURI: string }) {
+  // Load metadata individually per token
+  const { data: metadata, loading } = useTokenMetadata(tokenURI);
+
+  if (loading) return <Skeleton />;
+
+  return (
+    <div>
+      <img src={metadata?.image} />
+      <p>{metadata?.name}</p>
+    </div>
+  );
+}
+
+function TokenList() {
+  // First fetch tokens without metadata (fast)
+  const { data: tokens } = useTokensByOwner(ownerAddress);
+
+  return (
+    <div>
+      {tokens?.map(token => (
+        <TokenCard key={token.id} tokenURI={token.tokenURI} />
+      ))}
+    </div>
   );
 }
 ```

@@ -11,3 +11,18 @@ export {
   type SubgraphClientConfig,
   type SubgraphEndpoints,
 } from './client';
+
+// Re-export metadata utilities
+export {
+  fetchTokenMetadata,
+  resolveTokenURI,
+  createMetadataFetcher,
+  createMemoryCache,
+  createLocalStorageCache,
+  createNoCache,
+  type NFTMetadata,
+  type NFTAttribute,
+  type MetadataCache,
+  type FetchMetadataOptions,
+  type MetadataFetcherConfig,
+} from './metadata';
