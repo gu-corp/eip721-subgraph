@@ -21,7 +21,7 @@ import {
 
 function App() {
   return (
-    <EIP721Provider config={{ url: SUBGRAPH_ENDPOINTS.joc }}>
+    <EIP721Provider config={{ url: SUBGRAPH_ENDPOINTS[81] }}>
       <TokenList />
     </EIP721Provider>
   );
@@ -50,7 +50,7 @@ function TokenList() {
 ### Basic Configuration
 
 ```tsx
-<EIP721Provider config={{ url: SUBGRAPH_ENDPOINTS.joc }}>
+<EIP721Provider config={{ url: SUBGRAPH_ENDPOINTS[81] }}>
   {children}
 </EIP721Provider>
 ```
@@ -62,7 +62,7 @@ Configure global IPFS/Arweave gateways and caching for all metadata hooks:
 ```tsx
 <EIP721Provider
   config={{
-    url: SUBGRAPH_ENDPOINTS.joc,
+    url: SUBGRAPH_ENDPOINTS[81],
     metadata: {
       ipfsGateways: ['https://my-gateway.com/ipfs/', 'https://ipfs.io/ipfs/'],
       arweaveGateways: ['https://arweave.net/'],
@@ -242,7 +242,7 @@ function App() {
   return (
     <EIP721Provider
       config={{
-        url: SUBGRAPH_ENDPOINTS.joc,
+        url: SUBGRAPH_ENDPOINTS[81],
         metadata: {
           cache: 'localStorage',
           ttl: 3600000,
@@ -280,8 +280,8 @@ function NFTGallery() {
 
 | Network | Endpoint |
 |---------|----------|
-| JOC | `SUBGRAPH_ENDPOINTS.joc` |
-| JOC Testnet | `SUBGRAPH_ENDPOINTS.joct` |
+| JOC (81) | `SUBGRAPH_ENDPOINTS[81]` |
+| JOC Testnet (10081) | `SUBGRAPH_ENDPOINTS[10081]` |
 
 ## License
 

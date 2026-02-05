@@ -119,7 +119,7 @@ Provides React hooks for the subgraph:
 Provider metadata configuration (optional):
 ```tsx
 <EIP721Provider config={{
-  url: SUBGRAPH_ENDPOINTS.joc,
+  url: SUBGRAPH_ENDPOINTS[81],
   metadata: {
     ipfsGateways: ['https://my-gateway.com/ipfs/'],
     arweaveGateways: ['https://arweave.net/'],

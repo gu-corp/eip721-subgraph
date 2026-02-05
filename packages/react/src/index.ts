@@ -14,6 +14,7 @@ export {
   useTokens,
   useTokensByOwner,
   useTokensByContract,
+  type TokenData,
   // Token with metadata hooks
   useTokenWithMetadata,
   useTokensWithMetadata,
