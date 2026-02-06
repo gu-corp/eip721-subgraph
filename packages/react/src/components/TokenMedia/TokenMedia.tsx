@@ -131,6 +131,7 @@ function useResolvedSrc(options: {
 
   useEffect(() => {
     if (!src || loadedRef.current || exhausted) return;
+    if (src.startsWith('data:')) return;
 
     const timer = setTimeout(() => {
       if (!loadedRef.current) {
