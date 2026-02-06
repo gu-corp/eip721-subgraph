@@ -262,6 +262,14 @@ The client package includes a metadata module for fetching NFT metadata from tok
 │  │                   │  │ Contract: useTokenContract(s)         ││
 │  │                   │  │ Stats: useGlobalStatistics            ││
 │  └───────────────────┘  └───────────────────────────────────────┘│
+│  ┌───────────────────────────────────────────────────────────────┐│
+│  │                    Components                                 ││
+│  │───────────────────────────────────────────────────────────────││
+│  │ TokenMedia: Renders NFT media (image/video) from tokenURI    ││
+│  │   - Fetches metadata → resolves image/animation_url          ││
+│  │   - IPFS/Arweave gateway fallback with timeout               ││
+│  │   - Auto-detects video vs image from metadata                ││
+│  └───────────────────────────────────────────────────────────────┘│
 └───────────────────────────────────────────────────────────────────┘
 ```
 
@@ -293,6 +301,25 @@ The client package includes a metadata module for fetching NFT metadata from tok
 | `useTokenContract(id)` | Fetch single contract |
 | `useTokenContracts(options)` | Fetch contracts with pagination |
 | `useGlobalStatistics()` | Fetch total contracts, tokens, owners |
+
+### Components
+
+**TokenMedia:**
+
+Renders NFT media (image or video) from a tokenURI with IPFS/Arweave gateway fallback.
+
+```
+tokenURI → useTokenMetadata() → metadata.image / metadata.animation_url
+                                        ↓
+                              resolveTokenURI() → [gateway1, gateway2, ...]
+                                        ↓
+                              <img> or <video> with auto-retry on error/timeout
+```
+
+- `mediaType='auto'` (default): renders `<video>` if `animation_url` exists, `<img>` otherwise
+- `mediaType='image'`: always `<img>` using `metadata.image`
+- `mediaType='video'`: always `<video>` using `metadata.animation_url`
+- `fallbackSrc`: direct URL used when all gateways are exhausted
 
 ### Usage Example
 

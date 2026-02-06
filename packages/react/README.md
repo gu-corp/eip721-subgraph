@@ -229,6 +229,55 @@ function TokenList() {
 }
 ```
 
+## TokenMedia Component
+
+Renders NFT media (image or video) from a tokenURI with automatic IPFS/Arweave gateway fallback.
+
+```tsx
+import { TokenMedia } from '@gu-corp/eip721-subgraph-react';
+
+// Auto-detect: video if animation_url exists in metadata, image otherwise
+<TokenMedia tokenURI={token.tokenURI} fallbackSrc="/placeholder.png" />
+
+// Force image mode
+<TokenMedia tokenURI={token.tokenURI} mediaType="image" />
+
+// Force video mode
+<TokenMedia tokenURI={token.tokenURI} mediaType="video" />
+
+// With loading/error states
+<TokenMedia
+  tokenURI={token.tokenURI}
+  loadingContent={<Skeleton />}
+  errorContent={(err) => <p>{err.message}</p>}
+  fallbackSrc="/placeholder.png"
+  gatewayTimeout={5000}
+/>
+
+// Override gateways for this component
+<TokenMedia
+  tokenURI={token.tokenURI}
+  ipfsGateways={['https://my-gateway.com/ipfs/']}
+/>
+```
+
+**Props:**
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `tokenURI` | `string \| null` | TokenURI to fetch metadata from |
+| `mediaType` | `'auto' \| 'image' \| 'video'` | Media type to render (default: `'auto'`) |
+| `fallbackSrc` | `string` | Fallback URL when all gateways fail |
+| `gatewayTimeout` | `number` | Timeout per gateway attempt (default: 5000ms) |
+| `loadingContent` | `ReactNode` | Content to show while loading |
+| `errorContent` | `ReactNode \| (error: Error) => ReactNode` | Content to show on error |
+| `onMediaLoad` | `(event) => void` | Callback on successful media load |
+| `onAllGatewaysFailed` | `() => void` | Callback when all gateways exhausted |
+| `ipfsGateways` | `string[]` | Override IPFS gateways |
+| `arweaveGateways` | `string[]` | Override Arweave gateways |
+
+Also supports common HTML attributes (`className`, `style`, `alt`, `width`, `height`, `crossOrigin`) and video-specific props (`autoPlay`, `loop`, `muted`, `controls`, `playsInline`).
+
 ## NFT Gallery Example
 
 ```tsx
@@ -236,6 +285,7 @@ import {
   EIP721Provider,
   SUBGRAPH_ENDPOINTS,
   useTokensWithMetadata,
+  TokenMedia,
 } from '@gu-corp/eip721-subgraph-react';
 
 function App() {
@@ -264,9 +314,11 @@ function NFTGallery() {
     <div className="grid grid-cols-4 gap-4">
       {data?.map(token => (
         <div key={token.id} className="card">
-          {token.metadata?.image && (
-            <img src={token.metadata.image} alt={token.metadata.name} />
-          )}
+          <TokenMedia
+            tokenURI={token.tokenURI}
+            alt={token.metadata?.name}
+            fallbackSrc="/placeholder.png"
+          />
           <h3>{token.metadata?.name || `#${token.tokenID}`}</h3>
           <p>{token.contract.name}</p>
         </div>

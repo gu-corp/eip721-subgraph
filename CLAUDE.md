@@ -37,6 +37,7 @@ eip721-subgraph/
 │   └── react/                    # @gu-corp/eip721-subgraph-react
 │       ├── src/
 │       │   ├── hooks/            # React hooks
+│       │   ├── components/       # React components (TokenMedia)
 │       │   ├── context.tsx       # EIP721Provider context
 │       │   └── index.ts          # Package exports
 │       └── package.json
@@ -108,13 +109,14 @@ Metadata functions:
 
 ### React Package
 
-Provides React hooks for the subgraph:
+Provides React hooks and components for the subgraph:
 - `EIP721Provider` - Context provider with URL and metadata configuration
 - Token hooks: `useToken`, `useTokens`, `useTokensByOwner`, `useTokensByContract`
 - **Metadata hooks**: `useTokenMetadata`, `useTokenWithMetadata`, `useTokensWithMetadata`, `useTokensByOwnerWithMetadata`, `useTokensByContractWithMetadata`
 - Owner hooks: `useOwner`, `useOwners`, `useOwnerPerTokenContracts`
 - Contract hooks: `useTokenContract`, `useTokenContracts`
 - Statistics: `useGlobalStatistics`
+- **Components**: `TokenMedia` - Renders NFT media (image/video) from tokenURI with gateway fallback
 
 Provider metadata configuration (optional):
 ```tsx

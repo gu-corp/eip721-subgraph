@@ -33,5 +33,8 @@ export {
   useGlobalStatistics,
 } from './hooks';
 
+// Components
+export { TokenMedia, type TokenMediaProps, type MediaType } from './components';
+
 // Re-export subgraph endpoints for convenience
 export { SUBGRAPH_ENDPOINTS } from '@gu-corp/eip721-subgraph-client';

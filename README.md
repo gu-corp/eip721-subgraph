@@ -82,6 +82,7 @@ const { data: metadata } = useTokenMetadata('ipfs://Qm...');
 - **Subgraph**: Indexes ERC-721 Transfer events, tracks ownership, contract metadata, and global statistics
 - **Client**: Type-safe GraphQL queries, auto-generated types, urql integration
 - **React**: Ready-to-use hooks for tokens, owners, contracts, and statistics
+- **Components**: `TokenMedia` component for rendering NFT media with gateway fallback
 - **Metadata Fetching**: IPFS/Arweave gateway fallback, caching (memory/localStorage)
 
 ## Development
