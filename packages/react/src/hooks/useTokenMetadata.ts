@@ -1,10 +1,10 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from "react";
 import {
   fetchTokenMetadata,
   type NFTMetadata,
   type FetchMetadataOptions,
-} from '@gu-corp/eip721-subgraph-client';
-import { useEIP721Context } from '../context';
+} from "@gu-corp/eip721-subgraph-client";
+import { useEIP721Context } from "../context";
 
 interface UseTokenMetadataResult {
   data: NFTMetadata | null;
@@ -40,7 +40,7 @@ interface UseTokenMetadataResult {
  */
 export function useTokenMetadata(
   tokenURI: string | null | undefined,
-  options: FetchMetadataOptions = {}
+  options: FetchMetadataOptions = {},
 ): UseTokenMetadataResult {
   const { metadataOptions } = useEIP721Context();
   const [data, setData] = useState<NFTMetadata | null>(null);
@@ -48,7 +48,10 @@ export function useTokenMetadata(
   const [error, setError] = useState<Error | null>(null);
 
   // Merge provider options with hook-specific options (hook options take precedence)
-  const mergedOptions = { ...metadataOptions, ...options };
+  const stringifiedMergedOptions = JSON.stringify({
+    ...metadataOptions,
+    ...options,
+  });
 
   const fetchData = useCallback(async () => {
     if (!tokenURI) {
@@ -62,14 +65,17 @@ export function useTokenMetadata(
     setError(null);
 
     try {
-      const metadata = await fetchTokenMetadata(tokenURI, mergedOptions);
+      const metadata = await fetchTokenMetadata(
+        tokenURI,
+        JSON.parse(stringifiedMergedOptions),
+      );
       setData(metadata);
     } catch (err) {
       setError(err instanceof Error ? err : new Error(String(err)));
     } finally {
       setLoading(false);
     }
-  }, [tokenURI, mergedOptions]);
+  }, [tokenURI, stringifiedMergedOptions]);
 
   useEffect(() => {
     fetchData();

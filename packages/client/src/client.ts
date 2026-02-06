@@ -7,16 +7,17 @@ export interface SubgraphClientConfig {
 }
 
 export interface SubgraphEndpoints {
-  joc: string;
-  joct: string;
+  [chainId: number]: string;
 }
 
 /**
  * Default subgraph endpoints for different networks.
+ * - 81: JOC (Japan Open Chain)
+ * - 10081: JOCT (Japan Open Chain Testnet)
  */
 export const SUBGRAPH_ENDPOINTS: SubgraphEndpoints = {
-  joc: 'https://api.gu.net/v1/subgraphs/evm/81/eip721',
-  joct: 'https://api.gu.net/v1/subgraphs/evm/10081/eip721',
+  81: 'https://api.gu.net/v1/subgraphs/evm/81/eip721',
+  10081: 'https://api.gu.net/v1/subgraphs/evm/10081/eip721',
 };
 
 /**

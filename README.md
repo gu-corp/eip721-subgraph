@@ -31,7 +31,7 @@ import {
   getTokens,
 } from '@gu-corp/eip721-subgraph-client';
 
-const client = createSubgraphClient({ url: SUBGRAPH_ENDPOINTS.joc });
+const client = createSubgraphClient({ url: SUBGRAPH_ENDPOINTS[81] });
 const { data } = await getTokens(client, { first: 10, skip: 0 });
 ```
 
@@ -46,7 +46,7 @@ import {
 
 function App() {
   return (
-    <EIP721Provider config={{ url: SUBGRAPH_ENDPOINTS.joc }}>
+    <EIP721Provider config={{ url: SUBGRAPH_ENDPOINTS[81] }}>
       <TokenList />
     </EIP721Provider>
   );
@@ -74,8 +74,8 @@ const { data: metadata } = useTokenMetadata('ipfs://Qm...');
 
 | Network | Endpoint |
 |---------|----------|
-| JOC | `SUBGRAPH_ENDPOINTS.joc` |
-| JOC Testnet | `SUBGRAPH_ENDPOINTS.joct` |
+| JOC (81) | `SUBGRAPH_ENDPOINTS[81]` |
+| JOC Testnet (10081) | `SUBGRAPH_ENDPOINTS[10081]` |
 
 ## Features
 

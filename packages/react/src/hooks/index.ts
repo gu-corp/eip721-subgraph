@@ -1,4 +1,10 @@
-export { useToken, useTokens, useTokensByOwner, useTokensByContract } from './useToken';
+export {
+  useToken,
+  useTokens,
+  useTokensByOwner,
+  useTokensByContract,
+  type TokenData,
+} from './useToken';
 export {
   useTokenWithMetadata,
   useTokensWithMetadata,

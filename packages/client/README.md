@@ -22,7 +22,7 @@ import {
 
 // Create client
 const client = createSubgraphClient({
-  url: SUBGRAPH_ENDPOINTS.joc,
+  url: SUBGRAPH_ENDPOINTS[81],
 });
 
 // Fetch tokens
@@ -41,8 +41,8 @@ const { data: ownerTokens } = await getTokensByOwner(client, {
 
 | Network | Endpoint |
 |---------|----------|
-| JOC | `SUBGRAPH_ENDPOINTS.joc` |
-| JOC Testnet | `SUBGRAPH_ENDPOINTS.joct` |
+| JOC (81) | `SUBGRAPH_ENDPOINTS[81]` |
+| JOC Testnet (10081) | `SUBGRAPH_ENDPOINTS[10081]` |
 
 Or use a custom URL:
 

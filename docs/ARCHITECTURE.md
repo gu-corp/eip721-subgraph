@@ -306,7 +306,7 @@ import {
 
 function App() {
   return (
-    <EIP721Provider config={{ url: SUBGRAPH_ENDPOINTS.joc }}>
+    <EIP721Provider config={{ url: SUBGRAPH_ENDPOINTS[81] }}>
       <TokenList />
     </EIP721Provider>
   );
@@ -340,7 +340,7 @@ function App() {
   return (
     <EIP721Provider
       config={{
-        url: SUBGRAPH_ENDPOINTS.joc,
+        url: SUBGRAPH_ENDPOINTS[81],
         metadata: {
           ipfsGateways: ['https://my-gateway.com/ipfs/', 'https://ipfs.io/ipfs/'],
           timeout: 15000,
@@ -406,8 +406,8 @@ Configured in `packages/subgraph/networks.json`:
 
 | Network | Start Block | Endpoint |
 |---------|-------------|----------|
-| joc | 1 | `SUBGRAPH_ENDPOINTS.joc` |
-| joc-testnet | 1 | `SUBGRAPH_ENDPOINTS.joct` |
+| joc | 1 | `SUBGRAPH_ENDPOINTS[81]` |
+| joc-testnet | 1 | `SUBGRAPH_ENDPOINTS[10081]` |
 | mainnet | 0 | - |
 | sepolia | 0 | - |
 

@@ -11,7 +11,7 @@ import {
 } from '@gu-corp/eip721-subgraph-client';
 import { useEIP721Context } from '../context';
 
-interface TokenData {
+export interface TokenData {
   id: string;
   tokenID: string;
   mintTime: string;
