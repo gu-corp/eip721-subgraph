@@ -1,6 +1,6 @@
 {
   "name": "@gu-corp/eip721-subgraph-client",
-  "version": "0.2.0",
+  "version": "1.0.0",
   "description": "TypeScript client for EIP-721 Subgraph with urql",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
