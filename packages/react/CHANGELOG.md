@@ -1,5 +1,12 @@
 # @gu-corp/eip721-subgraph-react
 
+## 1.1.2
+
+### Patch Changes
+
+- Updated dependencies [6660156]
+  - @gu-corp/eip721-subgraph-client@1.1.0
+
 ## 1.1.1
 
 ### Patch Changes
