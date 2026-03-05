@@ -36,8 +36,11 @@ jobs:
       - run: pnpm --filter @gu-corp/eip721-subgraph clean
       - run: pnpm --filter @gu-corp/eip721-subgraph codegen
       - run: pnpm --filter @gu-corp/eip721-subgraph build -- --network joc
+      - name: Get version
+        id: version
+        run: echo "value=$(node -p "require('./packages/subgraph/package.json').version")" >> "$GITHUB_OUTPUT"
       - run: pnpm --filter @gu-corp/eip721-subgraph graph auth ${{ secrets.THE_GRAPH_EIP_721_JOC_DEPLOY_KEY }}
-      - run: pnpm --filter @gu-corp/eip721-subgraph graph deploy eip-721-joc --node https://api.studio.thegraph.com/deploy/ --version-label ${{ github.ref_name }}
+      - run: pnpm --filter @gu-corp/eip721-subgraph graph deploy eip-721-joc --node https://api.studio.thegraph.com/deploy/ --version-label ${{ steps.version.outputs.value }}
 
   deploy-joc-testnet:
     name: Deploy to JOC Testnet
@@ -56,8 +59,11 @@ jobs:
       - run: pnpm --filter @gu-corp/eip721-subgraph clean
       - run: pnpm --filter @gu-corp/eip721-subgraph codegen
       - run: pnpm --filter @gu-corp/eip721-subgraph build -- --network joc-testnet
+      - name: Get version
+        id: version
+        run: echo "value=$(node -p "require('./packages/subgraph/package.json').version")" >> "$GITHUB_OUTPUT"
       - run: pnpm --filter @gu-corp/eip721-subgraph graph auth ${{ secrets.THE_GRAPH_EIP_721_JOC_TESTNET_DEPLOY_KEY }}
-      - run: pnpm --filter @gu-corp/eip721-subgraph graph deploy eip-721-joc-testnet --node https://api.studio.thegraph.com/deploy/ --version-label ${{ github.ref_name }}
+      - run: pnpm --filter @gu-corp/eip721-subgraph graph deploy eip-721-joc-testnet --node https://api.studio.thegraph.com/deploy/ --version-label ${{ steps.version.outputs.value }}
 
   deploy-mainnet:
     name: Deploy to Mainnet
@@ -76,8 +82,11 @@ jobs:
       - run: pnpm --filter @gu-corp/eip721-subgraph clean
       - run: pnpm --filter @gu-corp/eip721-subgraph codegen
       - run: pnpm --filter @gu-corp/eip721-subgraph build -- --network mainnet
+      - name: Get version
+        id: version
+        run: echo "value=$(node -p "require('./packages/subgraph/package.json').version")" >> "$GITHUB_OUTPUT"
       - run: pnpm --filter @gu-corp/eip721-subgraph graph auth ${{ secrets.THE_GRAPH_EIP_721_MAINNET_DEPLOY_KEY }}
-      - run: pnpm --filter @gu-corp/eip721-subgraph graph deploy eip-721-mainnet --node https://api.studio.thegraph.com/deploy/ --version-label ${{ github.ref_name }}
+      - run: pnpm --filter @gu-corp/eip721-subgraph graph deploy eip-721-mainnet --node https://api.studio.thegraph.com/deploy/ --version-label ${{ steps.version.outputs.value }}
 
   deploy-sepolia:
     name: Deploy to Sepolia
@@ -96,8 +105,11 @@ jobs:
       - run: pnpm --filter @gu-corp/eip721-subgraph clean
       - run: pnpm --filter @gu-corp/eip721-subgraph codegen
       - run: pnpm --filter @gu-corp/eip721-subgraph build -- --network sepolia
+      - name: Get version
+        id: version
+        run: echo "value=$(node -p "require('./packages/subgraph/package.json').version")" >> "$GITHUB_OUTPUT"
       - run: pnpm --filter @gu-corp/eip721-subgraph graph auth ${{ secrets.THE_GRAPH_EIP_721_SEPOLIA_DEPLOY_KEY }}
-      - run: pnpm --filter @gu-corp/eip721-subgraph graph deploy eip-721-sepolia --node https://api.studio.thegraph.com/deploy/ --version-label ${{ github.ref_name }}
+      - run: pnpm --filter @gu-corp/eip721-subgraph graph deploy eip-721-sepolia --node https://api.studio.thegraph.com/deploy/ --version-label ${{ steps.version.outputs.value }}
 
   deploy-polygon:
     name: Deploy to Polygon
@@ -116,5 +128,8 @@ jobs:
       - run: pnpm --filter @gu-corp/eip721-subgraph clean
       - run: pnpm --filter @gu-corp/eip721-subgraph codegen
       - run: pnpm --filter @gu-corp/eip721-subgraph build -- --network matic
+      - name: Get version
+        id: version
+        run: echo "value=$(node -p "require('./packages/subgraph/package.json').version")" >> "$GITHUB_OUTPUT"
       - run: pnpm --filter @gu-corp/eip721-subgraph graph auth ${{ secrets.THE_GRAPH_EIP_721_POLYGON_DEPLOY_KEY }}
-      - run: pnpm --filter @gu-corp/eip721-subgraph graph deploy eip-721-polygon --node https://api.studio.thegraph.com/deploy/ --version-label ${{ github.ref_name }}
+      - run: pnpm --filter @gu-corp/eip721-subgraph graph deploy eip-721-polygon --node https://api.studio.thegraph.com/deploy/ --version-label ${{ steps.version.outputs.value }}
