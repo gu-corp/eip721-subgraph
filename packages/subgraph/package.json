@@ -30,7 +30,7 @@
     "build:joc-testnet": "graph build --network joc-testnet",
     "build:mainnet": "graph build --network mainnet",
     "build:sepolia": "graph build --network sepolia",
-    "build:polygon": "graph build --network polygon",
+    "build:polygon": "graph build --network matic",
     "deploy": "graph deploy",
     "deploy:joc": "npm run codegen && npm run build:joc",
     "deploy:joc-testnet": "npm run codegen && npm run build:joc-testnet",
