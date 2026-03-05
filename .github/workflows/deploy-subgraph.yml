@@ -127,7 +127,7 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter @gu-corp/eip721-subgraph clean
       - run: pnpm --filter @gu-corp/eip721-subgraph codegen
-      - run: pnpm --filter @gu-corp/eip721-subgraph build -- --network matic
+      - run: pnpm --filter @gu-corp/eip721-subgraph build -- --network polygon
       - name: Get version
         id: version
         run: echo "value=$(node -p "require('./packages/subgraph/package.json').version")" >> "$GITHUB_OUTPUT"

@@ -30,11 +30,13 @@
     "build:joc-testnet": "graph build --network joc-testnet",
     "build:mainnet": "graph build --network mainnet",
     "build:sepolia": "graph build --network sepolia",
+    "build:polygon": "graph build --network polygon",
     "deploy": "graph deploy",
     "deploy:joc": "npm run codegen && npm run build:joc",
     "deploy:joc-testnet": "npm run codegen && npm run build:joc-testnet",
     "deploy:mainnet": "npm run codegen && npm run build:mainnet",
     "deploy:sepolia": "npm run codegen && npm run build:sepolia",
+    "deploy:polygon": "npm run codegen && npm run build:polygon",
     "graph": "graph"
   },
   "devDependencies": {
