@@ -1,5 +1,11 @@
 # @gu-corp/eip721-subgraph-react
 
+## 1.1.1
+
+### Patch Changes
+
+- 4b18e3e: Fix base64 (data URI) images disappearing after gateway timeout in TokenMedia
+
 ## 1.1.0
 
 ### Minor Changes
