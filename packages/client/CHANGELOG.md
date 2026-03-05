@@ -1,5 +1,11 @@
 # @gu-corp/eip721-subgraph-client
 
+## 1.1.0
+
+### Minor Changes
+
+- 6660156: Add Ethereum Mainnet (chain ID 1) to SUBGRAPH_ENDPOINTS
+
 ## 1.0.0
 
 ### Major Changes
