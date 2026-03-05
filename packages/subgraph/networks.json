@@ -18,5 +18,10 @@
     "EIP721": {
       "startBlock": 1
     }
+  },
+  "matic": {
+    "EIP721": {
+      "startBlock": 0
+    }
   }
 }
